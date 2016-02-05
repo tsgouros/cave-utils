@@ -7,4 +7,4 @@ export LIBRARY_PATH=/gpfs/runtime/opt/python/2.7.3/lib:$LIBRARY_PATH
 export LD_LIBRARY_PATH=/gpfs/runtime/opt/python/2.7.3/lib:$LD_LIBRARY_PATH
 export PYTHON_DIR=/gpfs/runtime/opt/python/2.7.3
 
-/users/cavedemo/bin/projd.py
+/gpfs/runtime/opt/cave-utils/yurt/bin/projd.py
