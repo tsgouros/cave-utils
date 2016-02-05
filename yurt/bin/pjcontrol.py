@@ -126,7 +126,7 @@ class ProjectorControl(object):
             print "proj{0}".format(self.number), self.serialSwitch, self.switchPort, "cmd =", cmd
             out = subprocess.check_output(["ssh",
                                            "cave020",
-                                           "/users/cavedemo/bin/pjexpect", 
+                                           "/gpfs/runtime/cave-utils/yurt/bin/pjexpect", 
                                            "proj{0:02d}".format(self.number),
                                            "do",
                                            self.serialSwitch,
@@ -522,7 +522,7 @@ if __name__ == "__main__":
 
     #########################################################################
     # Open the shelf file.  It might be empty, so check first.
-    shelf = shelve.open("/users/cavedemo/etc/projector.db", writeback=True)
+    shelf = shelve.open("/gpfs/runtime/cave-utils/yurt/etc/projector.db", writeback=True)
 
     # Prepare the items on the shelf.
     if "projs" in shelf.keys():

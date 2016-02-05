@@ -65,7 +65,7 @@ class projChat(threading.Thread):
 
                 logging.info(data.rstrip('\n\r') + '>')
 
-                out = subprocess.check_output(["/users/cavedemo/bin/pjcontrol-raw", 
+                out = subprocess.check_output(["/gpfs/runtime/cave-utils/yurt/bin/pjcontrol-raw", 
                                                "{0:02d}".format(self.projNumber),
                                                "raw {0}".format(data)])
 
