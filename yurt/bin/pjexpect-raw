@@ -1,0 +1,33 @@
+#! /bin/sh
+# \
+exec expect -- "$0" ${1+"$@"}
+
+set proj [lindex $argv 0]
+set action [lindex $argv 1]
+set switch [lindex $argv 2]
+set port [lindex $argv 3]
+set command [lindex $argv 4]
+
+log_user 0
+
+set pid [spawn telnet $switch $port]
+
+send "$command\r"
+expect  {
+	ERR: {
+		expect *\n
+		send_user "Error attempting command $command on $proj: $expect_out(buffer)" 
+		exit
+	}
+	ACK: {
+		expect *\n
+		send_user "$expect_out(buffer)"
+	}
+	NoErr {
+		send_user "$proj: NoErr\n"
+	}
+	timeout {
+		expect *
+		send_user "$proj: $expect_out(buffer)"
+	}
+}
