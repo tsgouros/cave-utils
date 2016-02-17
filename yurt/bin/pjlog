@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "from /gpfs/runtime/opt/cave-utils/yurt/log/pjcontrollog.txt"
+tail -25 /gpfs/runtime/opt/cave-utils/yurt/log/pjcontrollog.txt
+

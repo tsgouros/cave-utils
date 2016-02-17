@@ -48,6 +48,11 @@ import re
 import subprocess
 import datetime
 
+import logging
+import os
+import socket
+import sys
+
 # This holds a bunch of projector objects, indexed by serial number.
 projs = dict()
 
@@ -126,7 +131,7 @@ class ProjectorControl(object):
             print "proj{0}".format(self.number), self.serialSwitch, self.switchPort, "cmd =", cmd
             out = subprocess.check_output(["ssh",
                                            "cave020",
-                                           "/gpfs/runtime/cave-utils/yurt/bin/pjexpect", 
+                                           "/gpfs/runtime/opt/cave-utils/yurt/bin/pjexpect", 
                                            "proj{0:02d}".format(self.number),
                                            "do",
                                            self.serialSwitch,
@@ -452,6 +457,13 @@ def parseIntegers(inputStr=""):
 
 if __name__ == "__main__":
 
+    LOGFORMAT = '%(asctime)-15s %(machine)s %(username)s %(message)s'
+    logging.basicConfig(filename='/gpfs/runtime/opt/cave-utils/yurt/log/pjcontrollog.txt', level=logging.DEBUG,format=LOGFORMAT)
+    logdata = {'username': os.getlogin(),
+               'machine':  socket.gethostname()}
+    logging.info('pjcontrol %s', " ".join(sys.argv[1:]), extra=logdata)
+
+
     ## TODO: This should not exit, but throw some kind of exception
     ## that if not handled, closes the shelf and exits.
     def abandon(errorString):
@@ -522,7 +534,7 @@ if __name__ == "__main__":
 
     #########################################################################
     # Open the shelf file.  It might be empty, so check first.
-    shelf = shelve.open("/gpfs/runtime/cave-utils/yurt/etc/projector.db", writeback=True)
+    shelf = shelve.open("/gpfs/runtime/opt/cave-utils/yurt/etc/projector.db", writeback=True)
 
     # Prepare the items on the shelf.
     if "projs" in shelf.keys():

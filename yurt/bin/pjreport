@@ -1,0 +1,3 @@
+#!/bin/bash
+/gpfs/runtime/opt/cave-utils/yurt/bin/pjcontrol -R > /gpfs/runtime/opt/cave-utils/yurt/etc/projector-report-`date +%y-%m-%d`.txt
+chmod 555 /gpfs/runtime/opt/cave-utils/yurt/etc/projector-report-`date +%y-%m-%d`.txt
