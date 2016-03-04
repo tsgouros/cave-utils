@@ -130,7 +130,7 @@ class ProjectorControl(object):
         if self.projector != "none":
             print "proj{0}".format(self.number), self.serialSwitch, self.switchPort, "cmd =", cmd
             out = subprocess.check_output(["ssh",
-                                           "cave020",
+                                           "cave001",
                                            "/gpfs/runtime/opt/cave-utils/yurt/bin/pjexpect", 
                                            "proj{0:02d}".format(self.number),
                                            "do",
