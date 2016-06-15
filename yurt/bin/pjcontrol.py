@@ -534,7 +534,7 @@ if __name__ == "__main__":
 
     #########################################################################
     # Open the shelf file.  It might be empty, so check first.
-    shelf = shelve.open("/gpfs/runtime/opt/cave-utils/yurt/etc/projector.db", writeback=True)
+    shelf = shelve.open(os.path.expandvars("${PROJECTORDB}"), writeback=True)
 
     # Prepare the items on the shelf.
     if "projs" in shelf.keys():
@@ -803,7 +803,9 @@ if __name__ == "__main__":
             for p in projectorsToControl:
                 if p not in projControls.keys():
                     abandon("I wish I knew a projector {0}, but I don't.".format(p))
-                projControls[p].recordProjectorData(False)
+                # We assume the operator means to overwrite the projector
+                # data, since he or she has asked for it specifically.
+                projControls[p].recordProjectorData(True)
 
             command = "none"
 

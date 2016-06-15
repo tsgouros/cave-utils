@@ -10,4 +10,6 @@ export PKG_CONFIG_PATH=/gpfs/runtime/opt/python/2.7.3/lib/pkgconfig:$PKG_CONFIG_
 
 export PYTHON_DIR=/gpfs/runtime/opt/python/2.7.3
 
+export PROJECTORDB=/gpfs/runtime/opt/cave-utils/yurt/etc/projector.db
+
 /gpfs/runtime/opt/cave-utils/yurt/bin/pjcontrol.py $*
