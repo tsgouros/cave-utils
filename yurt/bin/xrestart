@@ -1,0 +1,21 @@
+#! /bin/bash
+
+VERSION=331.38
+DRIVERS_DIR=/gpfs/runtime/nvidia/drivers
+
+if [[ -n "$1" && -f $DRIVERS_DIR/nv-driver-$1.tar.gz ]]
+then
+	VERSION=$1
+fi
+DRIVER_TAR=$DRIVERS_DIR/nv-driver-$VERSION.tar.gz
+
+init 4				# stop X server
+rmmod nvidia-uvm		# unload nvidia drivers
+rmmod nvidia
+cd /; tar xzpf $DRIVER_TAR	# update distribution
+depmod				# prepare kernel modules
+modprobe nvidia-uvm		# load kernel modules
+ldconfig -X			# prepare shared libraries
+init 3				# start X server
+
+
