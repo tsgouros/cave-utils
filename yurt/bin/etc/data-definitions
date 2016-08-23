@@ -1,0 +1,76 @@
+Projectors	
+  Projector_Serial	no	Serial number of the projector
+	Mfg_Date	no	Manufacturing date of the projector
+	Last_Updated	no	Last time this table was changed
+	Lens	yes	Type of Lens on Projector: Short or Long
+	redOffset	yes	Color setting
+	greenOffset	yes	Color setting
+	blueOffset	yes	Color setting
+	redGain	yes	Color setting
+	greenGain	yes	Color setting
+	blueGain	yes	Color setting
+	colorTemp	yes	Color setting
+	gamma	yes	Color setting
+			
+Projector Settings History	Projector_Serial	no	Serial number of the projector
+	Date_In	no	Date placed in this setting
+	Date_Out	no	Date removed from this setting
+	Lens	no	Lens at this time: Short or Long
+	redOffset	no	Color setting
+	greenOffset	no	Color setting
+	blueOffset	no	Color setting
+	redGain	no	Color setting
+	greenGain	no	Color setting
+	blueGain	no	Color setting
+	colorTemp	no	Color setting
+	gamma	no	Color setting
+	Note	no	Miscellaneous Note
+			
+			
+Projector Current Status	Projector_Serial	no	Serial number of the projector
+	Status	yes	Projector Status: in use, broken, spare
+	Location	yes	location of the projector (on site or off site)
+	Position	yes	Number indicates the position in the YURT, na if the projector is broken or spare
+	Date_In	yes	Date the projector was placed in this position
+	Total Hours	yes	Amount of hours on the projector updated everyday
+			
+Positions	Position	no	Index representing position
+	Location	no	Defines where the position is: wall, door, floor, ceiling, N.A. 
+	Serial_Switch	no	Serial Switch based on position
+	Serial_Port	no	Serial Port based on position
+	Server	no	Computer that sends signal to the projector
+	Display	no	Display on the Server
+			
+Projector History	Projector_Serial	no	Serial number of the projector
+	Location	no	Location the projector was at: onsire, offsite, or if it was installed, then the position it was installed at
+	Status	no	Status the projector had: in use, spare, broken
+	Position	no	Number indicates the position in the YURT, na if the projector is broken or spare
+	Date_In	no	Date the Projector was placed in this status/location
+	Date_Out	no	Date the Projector was removed from this status/location
+	Note	no	Miscellaneous Notes
+	Total Hours	no	the amount of hours on the projector at time entered
+			
+Projector Repairs	Repair Index	no	Counter that keeps track of each repair
+	Projector_Serial	no	Serial number of the projector
+	Date	no	Day the repair took place
+	Repair	no	What the repair was (install, uninstall, bulb, board, ship)
+	Repaired_By	no	Person who repaired the projector EX/tsigurous
+	Note	no	Miscellaneous comments about the repair
+			
+Bulb Current Status	Bulb_ID	no	counter unique to Bulb, use for not until all of the Bulb's serial numbers are stored in the system
+	Bulb_Serial	no	The Bulb's serial number
+	Current Life	yes	The amount of times the bulb has been relamped, starts at 0,1,2,….
+	Status	yes	Bulb's current status: In Use, Spare, Broken
+	Projector_Serial	yes	The serial number of the projector the bulb is currently installed in, None if the bulb is spare or broken
+	Date_In	yes	Date the bulb was placed in its current status
+	Lamp Hours	yes	The amount of hours on the bulb updated everyday
+			
+Bulb History	Bulb_ID	no	counter unique to Bulb, use for not until all of the Bulb's serial numbers are stored in the system
+	Bulb_Serial	no	The serial number of the bulb
+	Life	no	The amount of times the bulb had been reLamped up to this point in time
+	Status	no	The Bulb's status at this time: In Use, Spare, Broken
+	Projector_Serial	no	The serial number of the projector the bulb was installed in, None if the bulb was spare or broken
+	Date_In	no	Date bulb was placed in the status at this point in time
+	Date_Out	no	Data bulb was removed from this status
+	Note	no	Miscellaneous comments about History
+	Lamp Hours	no	The amount of hours on the bulb at this time
