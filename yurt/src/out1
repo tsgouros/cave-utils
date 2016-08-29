@@ -1,0 +1,114 @@
+serverCmd = 'ssh -x -n cave001 "cd /users/cavedemo/demos/BandwidthTest/src; /gpfs/runtime/opt/cave/ccv/bin/vrg3d_server -nogfx /gpfs/runtime/opt/cave/ccv/share/vrsetup/cave-devices.cfg 54 "'
+ssh -x -n cave010 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_0 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave007 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_10 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave007 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_11 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave007 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_12 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave007 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_13 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave006 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_14 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave006 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_15 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave006 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_16 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave006 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_17 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave005 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_18 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave005 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_19 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave010 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_1 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave005 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_20 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave005 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_21 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave004 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_22 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave004 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_23 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave004 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_24 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave004 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_25 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave003 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_26 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave003 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_27 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave003 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_28 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave003 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_29 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave010 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_2 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave002 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_30 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave002 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_31 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave002 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_32 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave002 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_33 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave001 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_34 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave001 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_35 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave001 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_36 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave001 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_37 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave009 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_3 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave009 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_4 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave014 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_50 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave014 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_51 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave014 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_52 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave015 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_53 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave015 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_54 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave016 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_55 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave016 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_56 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave015 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_57 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave015 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_58 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave016 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_59 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave009 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_5 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave016 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_60 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave017 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_61 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave017 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_62 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+USE_SCALABLE defined
+ssh -x -n cave017 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_63 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+Event Server running on cave001.oscar.ccv.brown.edu on port 4045 a.k.a. 172.20.160.1:4045
+
+Listening for connections, will wait a max of 90 seconds..
+ssh -x -n cave018 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_64 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave018 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_65 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave009 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.3 ./bandwidthTest cave_6 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave008 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.0 ./bandwidthTest cave_7 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave008 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.1 ./bandwidthTest cave_8 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+ssh -x -n cave008 "cd /users/cavedemo/demos/BandwidthTest/src; VRG3D_BASE=/gpfs/runtime/opt/cave/ccv G=/gpfs/runtime/opt/cave/ccv DISPLAY=:0.2 ./bandwidthTest cave_9 /gpfs/scratch/bknorlei/geoview/export/june15/0601_tiled.tif"
+  Got connection from 172.20.160.10:57288
+  Got connection from 172.20.160.9:40975
+  Got connection from 172.20.160.9:40976
+  Got connection from 172.20.160.7:55704
+  Got connection from 172.20.160.10:57289
+  Got connection from 172.20.160.2:35600
+  Got connection from 172.20.160.7:55705
+  Got connection from 172.20.160.7:55706
+  Got connection from 172.20.160.7:55707
+  Got connection from 172.20.160.1:53744
+  Got connection from 172.20.160.14:51466
+  Got connection from 172.20.160.4:52324
+  Got connection from 172.20.160.10:57290
+  Got connection from 172.20.160.18:54528
+  Got connection from 172.20.160.1:53745
+  Got connection from 172.20.160.5:48569
+  Got connection from 172.20.160.5:48570
+  Got connection from 172.20.160.5:48571
+  Got connection from 172.20.160.1:53746
+  Got connection from 172.20.160.16:44504
+  Got connection from 172.20.160.14:51467
+  Got connection from 172.20.160.18:54529
+  Got connection from 172.20.160.14:51468
+  Got connection from 172.20.160.5:48572
+  Got connection from 172.20.160.17:51108
+  Got connection from 172.20.160.17:51109
+  Got connection from 172.20.160.16:44505
+  Got connection from 172.20.160.16:44506
+  Got connection from 172.20.160.4:52325
+  Got connection from 172.20.160.3:41692
+  Got connection from 172.20.160.9:40977
+  Got connection from 172.20.160.3:41693
+  Got connection from 172.20.160.3:41694
+  Got connection from 172.20.160.6:57218
+  Got connection from 172.20.160.6:57219
+  Got connection from 172.20.160.9:40978
+  Got connection from 172.20.160.2:35601
+  Got connection from 172.20.160.1:53747
+  Got connection from 172.20.160.16:44507
+  Got connection from 172.20.160.3:41695
+  Got connection from 172.20.160.17:51110
+  Got connection from 172.20.160.6:57220
+  Got connection from 172.20.160.4:52326
+  Got connection from 172.20.160.2:35602
+  Got connection from 172.20.160.4:52327
+  Got connection from 172.20.160.6:57221
+  Got connection from 172.20.160.8:59908
+  Got connection from 172.20.160.2:35603
+  Got connection from 172.20.160.15:37569
+  Got connection from 172.20.160.8:59909
+  Got connection from 172.20.160.15:37570
+  Got connection from 172.20.160.15:37571
+  Got connection from 172.20.160.15:37572
+  Got connection from 172.20.160.8:59910
+Entered

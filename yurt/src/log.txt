@@ -1,0 +1,15 @@
+Application Log
+Start: Sat Aug 27 19:30:51 2016
+
+Creating a TCP socket       Ok
+Disabled Nagel's algorithm.
+Set socket option no_linger.
+Set socket option reuseaddr.
+SOL_SOCKET/SO_RCVBUF = 33554432
+SOL_SOCKET/SO_SNDBUF = 33554432
+SOL_SOCKET/SO_RCVTIMEO = 0
+SOL_SOCKET/SO_SNDTIMEO = 0
+Created TCP socket 4
+Connecting to 172.20.160.24:1205 on TCP socket 4   FAIL
+CODE 111: Connection refused
+

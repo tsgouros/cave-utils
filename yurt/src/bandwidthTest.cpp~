@@ -1,0 +1,215 @@
+/*
+ * \author Alex Hills
+ *
+ * \file  gari_demo.cpp
+ *
+ * Adapted from chess_demo.cpp.
+ */
+
+
+#include <vrg3d/VRG3D.h>
+#include <GL/glut.h>
+#include <unistd.h>
+#include <iostream>     // std::cout
+#include <fstream>      // std::ifstream
+#include <sys/time.h>
+
+using namespace G3D;
+
+/** This is a sample VR application using the VRG3D library.  Two key
+    methods are filled in here: doGraphics() and doUserInput().  The
+    code in these methods demonstrates how to draw graphics and
+    respond to input from the mouse, the keyboard, 6D trackers, and VR
+    wand buttons.
+*/
+
+class MyVRApp : public VRApp
+{
+public:
+  MyVRApp(const std::string &mySetup, char *fname) : VRApp()
+  {
+    // initialize the VRApp
+    Log  *demoLog = new Log("demo-log.txt");
+    init(mySetup, demoLog);
+
+    // The default starting point has the eye level with the chess
+    // board, which is confusing for the viewer on startup, and
+    // renders poorly too. Let's move the virtual space up a few units
+    // for a more sensible view.
+   //_virtualToRoomSpace = CoordinateFrame();
+   
+    // This is the background -- the color that appears where there is
+    // nothing to render, and we'll use a nice soothing blue.
+    _clearColor = Color3(0.0, 0.0, 0.0);
+
+    // The actual models of the chess pieces are pretty messy, so they
+    // are confined to another code file for the sake of tidiness.
+
+filename = (char*) malloc(strlen(fname) + 1); 
+strcpy(filename, fname);
+
+    gethostname(hostname,sizeof hostname);
+    id = atoi(&hostname[4]);
+
+    loadFull = false;
+    loadPart = false;
+  }
+
+  virtual ~MyVRApp() {}
+
+  void doUserInput(Array<VRG3D::EventRef> &events)
+  {
+    static double joystick_x = 0.0;
+    static double joystick_y = 0.0;
+
+    for (int i = 0; i < events.size(); i++) {
+
+      if (events[i]->getName() == "Wand_Joystick_X")
+      { 
+		joystick_x = events[i]->get1DData();
+      }
+      else if (events[i]->getName() == "Wand_Joystick_Y")
+      { 
+		joystick_y = events[i]->get1DData();
+      }
+      
+
+      // Rotate
+      if (fabs(joystick_x) > 0.5) {
+	loadPart = true;
+      }
+      if (fabs(joystick_y) > 0.5 ) {
+	loadFull = true;
+      }
+    }
+  }
+
+#define CLIENT_SLEEP 0.0005
+
+  void doGraphics(RenderDevice *rd, bool left_eye)
+  {  
+    // The tracker frames above are drawn with the object to world
+    // matrix set to the identity because tracking data comes into the
+    // system in tfilenamehe Room Space coordinate system.  Room Space is tied
+    // to the dimensions of the room and the projection screen within
+    // the room, thus it never changes as your program runs.  However,
+    // it is often convenient to move objects around in a virtual
+    // space that can change relative to the screen.  For these
+    // objects, we put a virtual to ../../geoviewer/src/geoviewer_yurt.cpp 
+    // matrix stack before drawing them, as is done here..
+    //
+    rd->disableLighting();
+    rd->pushState();
+    //rd->setObjectToWorldMatrix(_virtualToRoomSpace);
+
+	if(loadPart){
+		int division = 100;
+		streampos size;
+		char * memblock;
+		ifstream file (filename, ios::in|ios::binary|ios::ate);
+		if (file.is_open())
+		{
+			cerr << filename << std::endl;
+
+			size = file.tellg();
+			int newSize = size / division;
+	
+			memblock = new char [newSize];
+			file.seekg (newSize * id, ios::beg);
+	
+			struct timeval diff, startTV, endTV;
+			gettimeofday(&startTV, NULL); 
+	
+			file.read (memblock, newSize);
+	
+			gettimeofday(&endTV, NULL); 
+			timersub(&endTV, &startTV, &diff);
+	
+			file.close();
+
+			double sizeMB = ((double) newSize) / 1024.0 / 1024.0;
+			double timeSec = 0.000001 * diff.tv_usec + diff.tv_sec;
+			cerr << fixed;
+			cerr << hostname << ": " <<  sizeMB << " MB" << "in " <<  timeSec << "s = "  << sizeMB / timeSec  << " MB/s" << std::endl; 
+
+			delete[] memblock;
+		}
+		loadPart = false;
+
+	}
+	if(loadFull){	
+		streampos size;
+		char * memblock;
+		ifstream file (filename, ios::in|ios::binary|ios::ate);
+		if (file.is_open())
+		{
+			size = file.tellg();
+			int newSize = size;
+	
+			memblock = new char [newSize];
+			file.seekg (0, ios::beg);
+	
+			struct timeval diff, startTV, endTV;
+			gettimeofday(&startTV, NULL); 
+	
+			file.read (memblock, newSize);
+	
+			gettimeofday(&endTV, NULL); 
+			timersub(&endTV, &startTV, &diff);
+	
+			file.close();
+
+			double sizeMB = ((double) newSize) / 1024.0 / 1024.0;
+			double timeSec = 0.000001 * diff.tv_usec + diff.tv_sec;
+                        cerr << fixed;
+			cerr << hostname << ": " <<  sizeMB << " MB in " <<  timeSec << "s = "  << sizeMB / timeSec  << " MB/s" << std::endl; 
+
+			delete[] memblock;
+		}
+		loadFull = false;
+	}
+
+	rd->popState();
+}
+
+protected:
+    char hostname[32]; 
+    int id;
+	bool loadFull;
+	bool loadPart;
+	//CoordinateFrame   _virtualToRoomSpace;
+char* filename;
+};
+
+
+
+
+int main( int argc, char **argv )
+{
+
+
+
+  // The first argument to the program tells us which of the known VR
+  // setups to start
+  std::string setupStr;
+  MyVRApp *app;
+
+  if (argc >= 2)
+  { 
+	setupStr = std::string(argv[1]);
+  }
+
+  // This opens up the graphics window, and starts connections to
+  // input devices, but doesn't actually start rendering yet.
+
+  app = new MyVRApp(setupStr,argv[2]);
+
+  // This starts the rendering/input processing loop
+  app->run();
+
+  return 0;
+}
+
+
+//
+////////////////////  end  common/vrg3d/demo/vrg3d_demo.cpp  ///////////////////

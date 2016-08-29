@@ -1,0 +1,18 @@
+#!/bin/bash
+
+
+export VRG3D_BASE="/gpfs/runtime/opt/cave/ccv"
+export G="/gpfs/runtime/opt/cave/ccv"
+export LD_RUN_PATH="$G/lib:$LD_RUN_PATH"
+export LD_LIBRARY_PATH="$G/lib:$LD_LIBRARY_PATH"
+
+#echo bandwidthTest > ~cavedemo/etc/running
+
+cd ~tsgouros/projects/BandwidthTest/src
+
+#~cavedemo/bin/run_cave ./bandwidthTest /gpfs/ssd/testReadSpeed//gari_crop2_tiled.tif
+~cavedemo/bin/run_cave.save_cerr ./bandwidthTest /gpfs/cit_15k/testReadSpeed/gari_crop2_tiled.tif
+#~cavedemo/bin/run_cave ./bandwidthTest ~cavedemo/data/geoviewer/geoviewerData/gari_crop2_tiled.tif
+#~cavedemo/bin/run_cave ./bandwidthTest /tmp/geoviewerData/gari_crop2_tiled.tif
+#~cavedemo/bin/run_cave ./bandwidthTest /gpfs/scratch/bknorlei/geoview/export/geoviewerDataNew/heic1502a_tiled.tif
+
