@@ -7,7 +7,7 @@ import collections
 
 input_file = '../performance/data/combined.txt'
 input_open = open(input_file, 'rb')
-output_file = '../performance/time-analysis.txt'
+output_file = '../performance/data/time-analysis.txt'
 output_open = open(output_file, "w")
 
 #initialize four dict for storing timestamp
@@ -21,6 +21,10 @@ avg_init = []
 avg_noncached = []
 avg_cached = []
 avg_tracking = []
+
+#lists to store speed
+avg_cached_speed = []
+avg_noncached_speed = []
 
 
 def get_time (line):
@@ -89,17 +93,19 @@ for line in input_open:
 	if event_type == "noncached-postload":
 		prev_time = noncached_load_file[node].pop()
 		diff = (curtime - prev_time) * 0.000001
-		fileSize = float(line[6][:-2])
-		speed = float(fileSize / diff)
-		noncached_load_file[node] += [speed]
+		noncached_fileSize = float(line[6][:-2])
+		noncached_load_file[node] += [diff]
+		#speed = float(fileSize / diff)
+		#noncached_load_file[node] += [speed]
 		continue
 
 	if event_type == "cached-postload":
 		prev_time = cached_load_file[node].pop()
 		diff = (curtime - prev_time) * 0.000001
-		fileSize = float(line[6][:-2])
-		speed = float(fileSize / diff) 
-		cached_load_file[node] += [speed]
+		cached_fileSize = float(line[6][:-2])
+		cached_load_file[node] += [diff]
+		#speed = float(cached_fileSize / diff) 
+		#cached_load_file[node] += [speed]
 		continue
 
 	if event_name != 'Head_Tracker':
@@ -134,6 +140,7 @@ for key, val in init.iteritems():
 	avg_init.append(int(val[0]))
 	output_open.write(newline)
 
+
 avg = str(np.mean(avg_init))
 min_val = str(np.amin(avg_init))
 max_val = str(np.amax(avg_init))
@@ -143,42 +150,76 @@ output_open.write(newline)
 
 
 #calculate average, min, max and standard deviation of non-cached reading speed
-output_open.write("Average non-cached load time of each node: \n")
+output_open.write("Average non-cached load time of each node (file size " + str(noncached_fileSize) + " MB): \n")
 for key, val in noncached_load_file.iteritems():
 	avg = np.mean(val)
-	noncached_load_file[key] = avg
-	newline = str(key) + ", " + str(avg) + " MB/s" + "\n" 
+	# noncached_load_file[key] = avg
+	# calculate the speed here
+	speed = float(noncached_fileSize / avg)
+	newline = str(key) + "," + str(avg) + "s, speed = " + str(noncached_fileSize) + "MB / " + str(avg) + "s = "+ str(speed) + " MB/s \n"
+	# newline = str(key) + ", " + str(avg) + " MB/s" + "\n" 
+	avg_noncached_speed.append(speed)
 	avg_noncached.append(avg)
 	output_open.write(newline)
 
-avg = str(np.mean(avg_noncached))
-min_val = str(np.amin(avg_noncached))
-max_val = str(np.amax(avg_noncached))
-std_val = str(np.std(avg_noncached))
-newline = "Average non-cached overall: " + avg + " MB/s\n" +  "Min non-cached reading speed: " + min_val + " MB/s\n" + "Max non-cached reading speed: " + max_val + " MB/s\n" + "Standard Deviation: " + std_val + " MB/s\n\n"
-output_open.write(newline)
+avg = np.mean(avg_noncached)
+avg_speed = np.mean(avg_noncached_speed)
+min_val = np.amin(avg_noncached)
+min_speed = np.amin(avg_noncached_speed)
+max_val = np.amax(avg_noncached)
+max_speed = np.amax(avg_noncached_speed)
+std_val = np.std(avg_noncached)
+std_speed = np.std(avg_noncached_speed)
+
+avgline = "Average non-cached overall: " + str(avg) + "s with a " + str(noncached_fileSize) + "MB file = " + str(avg_speed) + " MB/s \n"
+output_open.write(avgline)
+minline = "Min non-cached reading " + str(min_val) + "s with a " + str(noncached_fileSize) + "MB file = " + str(min_speed) + " MB/s \n"
+output_open.write(minline)
+maxline = "Max non-cached reading " + str(max_val) + "s with a " + str(noncached_fileSize) + "MB file = " + str(max_speed) + " MB/s \n"
+output_open.write(maxline)
+stdline = "STD non-cached reading: " + str(std_speed) + " MB/s \n\n"
+output_open.write(stdline)
+#newline = "Average non-cached overall: " + avg + " MB/s\n" +  "Min non-cached reading speed: " + min_val + " MB/s\n" + "Max non-cached reading speed: " + max_val + " MB/s\n" + "Standard Deviation: " + std_val + " MB/s\n\n"
+#output_open.write(newline)
 
 
 #calculate average, min, max and standard deviation of cached reading speed
-output_open.write("Average cached load time of each node: \n")
-for key, val in noncached_load_file.iteritems():
+output_open.write("Average cached load time of each node (file size " + str(cached_fileSize) + " MB): \n")
+for key, val in cached_load_file.iteritems():
 	avg = np.mean(val)
 	cached_load_file[key] = avg
-	newline = str(key) + ", " + str(avg) + " MB/s\n" 
+	speed = float(cached_fileSize / avg)
+	newline = str(key) + "," + str(avg) + "s, speed = " + str(cached_fileSize) + "MB / " + str(avg) + "s = "+ str(speed) + " MB/s \n"
+	#newline = str(key) + ", " + str(avg) + " MB/s\n" 
+	avg_cached_speed.append(float(speed))
 	avg_cached.append(float(avg))
 	output_open.write(newline)
-avg = str(np.mean(avg_cached))
-min_val = str(np.amin(avg_cached))
-max_val = str(np.amax(avg_cached))
-std_val = str(np.std(avg_cached))
-newline = "Average cached overall: " + avg + " MB/s\n" +  "Min cached reading speed: " + min_val + " MB/s\n" + "Max cached reading speed: " + max_val + " MB/s\n" + "Standard Deviation: " + std_val + " MB/s\n\n"
-output_open.write(newline)
+
+avg = np.mean(avg_cached)
+avg_speed = np.mean(avg_cached_speed)
+min_val = np.amin(avg_cached)
+min_speed = np.amin(avg_cached_speed)
+max_val = np.amax(avg_cached)
+max_speed = np.amax(avg_cached_speed)
+std_val = np.std(avg_cached)
+std_speed = np.std(avg_cached_speed)
+avgline = "Average cached overall: " + str(avg) + "s with a " + str(cached_fileSize) + "MB file = " + str(avg_speed) + " MB/s \n"
+output_open.write(avgline)
+minline = "Min cached reading " + str(min_val) + "s with a " + str(cached_fileSize) + "MB file = " + str(min_speed) + " MB/s \n"
+output_open.write(minline)
+maxline = "Max cached reading " + str(max_val) + "s with a " + str(cached_fileSize) + "MB file = " + str(max_speed) + " MB/s \n"
+output_open.write(maxline)
+stdline = "STD cached reading: " + str(std_speed) + " MB/s \n\n"
+output_open.write(stdline)
+#newline = "Average cached overall: " + avg + " MB/s\n" +  "Min cached reading speed: " + min_val + " MB/s\n" + "Max cached reading speed: " + max_val + " MB/s\n" + "Standard Deviation: " + std_val + " MB/s\n\n"
+#output_open.write(newline)
 
 
 
 #calculate average, min, max and standard deviation of head tracking time
 output_open.write("\nAverage Head Tracking time of each node: \n")
 for key, val in head_tracker.iteritems():
+	# disqualify the last element if it is a timestamp
 	if (val[len(val) - 1] > 1451606400):
 		val.pop()
 	avg = np.mean(val)
