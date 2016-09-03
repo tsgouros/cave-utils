@@ -41,19 +41,19 @@ class InventoryDatabase:
         self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorNumbers(projNumber TEXT, onScreen TEXT, serialSwitch TEXT, serialPort TEXT, projServer TEXT, projDisplay TEXT)')
         
     def createProjectorSettingsTable(self):
-        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorSettings(projectorSerial TEXT, mfgDate TEXT, redOffset TEXT, greenOffset TEXT, blueOffset TEXT, redGain TEXT, greenGain TEXT, blueGain TEXT, colorTemp TEXT, gamma TEXT)')
+        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorSettings(projectorSerial TEXT, redOffset TEXT, greenOffset TEXT, blueOffset TEXT, redGain TEXT, greenGain TEXT, blueGain TEXT, colorTemp TEXT, gamma TEXT)')
 
     def createProjectorSettingsHistoryTable(self):
-        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorSettingsHistory(projectorSerial TEXT, mfgDate TEXT, redOffset TEXT, greenOffset TEXT, blueOffset TEXT, redGain TEXT, greenGain TEXT, blueGain TEXT, colorTemp TEXT, gamma TEXT, dateRecorded TEXT, note TEXT)')
+        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorSettingsHistory(projectorSerial TEXT, redOffset TEXT, greenOffset TEXT, blueOffset TEXT, redGain TEXT, greenGain TEXT, blueGain TEXT, colorTemp TEXT, gamma TEXT, dateRecorded TEXT, note TEXT)')
 
     def createProjectorStatusTable(self):
-        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorStatus(projectorSerial TEXT, projNumber TEXT, totalHours TEXT, projStatus TEXT, onSite TEXT, lensType TEXT, dateIn TEXT, repairID TEXT, errorRecord TEXT)')
+        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorStatus(projectorSerial TEXT, mfgDate TEXT, projNumber TEXT, totalHours TEXT, projStatus TEXT, onSite TEXT, lensType TEXT, repairID TEXT, errorRecord TEXT)')
 
     def createProjectorStatusHistoryTable(self):
-        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorStatusHistory(projectorSerial TEXT, projNumber TEXT, totalHours TEXT, projStatus TEXT, onSite TEXT, lensType TEXT, dateIn TEXT, repairID TEXT, errorRecord TEXT, dateRecorded TEXT, note TEXT)')
+        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorStatusHistory(projectorSerial TEXT, mfgDate TEXT, projNumber TEXT, totalHours TEXT, projStatus TEXT, onSite TEXT, lensType TEXT, repairID TEXT, errorRecord TEXT, dateRecorded TEXT, note TEXT)')
 
     def createProjectorRepairsTable(self):
-        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorRepairs(repairID TEXT, projectorSerial TEXT, repairDate TEXT, repairType TEXT, repairedBy TEXT, repairNote TEXT)')
+        self._c.execute('CREATE TABLE IF NOT EXISTS ProjectorRepairs(repairID TEXT, projectorSerial TEXT, repairType TEXT, repairedBy TEXT, repairDate TEXT, repairNote TEXT)')
 
     def createBulbStatusTable(self):
         self._c.execute('CREATE TABLE IF NOT EXISTS BulbStatus(bulbID TEXT, bulbSerial TEXT, bulbLife TEXT, bulbStatus TEXT, projectorSerial TEXT, lampHours TEXT, dateIn TEXT, dateOut TEXT, repairID TEXT)')
@@ -70,15 +70,18 @@ class DatabaseTable:
     an entry is made in the history table when the table changes.
 
     """
-    def __init__(self, database, tableName, historyTableName, autoHistory):
+    def __init__(self, database, tableName, historyTableName):
         self._db = database
         self.tableName = tableName
         self.historyTableName = historyTableName
-        self.autoHistory = autoHistory
 
         # The first column in each of the tables is the primary key
         # for that table. 
         self.fieldNames = self.getColumnHeads()
+
+        if self.historyTableName:
+            self.historyTableFieldString = "(" + ",".join(self.getColumnHeads(self.historyTableName)) + ")"
+
         self.primaryKey = self.fieldNames[0]
         
     def getColumnHeads(self, table=None):
@@ -230,56 +233,15 @@ class DatabaseTable:
         return(datetime.date.today().isoformat())
 
 
-    def updatePrep(self, fieldValues, keyIndex=None, note="",
-                   date=None, recordHistory=False):
-        """
-        This method looks for a record that matches the first value in the
-        input fieldValues, and returns a tuple of the matching row.  If more
-        than one row matches, or if no rows match, the return is empty.
-
-        Use this method in writing an update() method in the subclass, 
-        especially where the existing data will be recorded in a history
-        table, e.g.:
-
-          def update(vals):
-            row = self.updatePrep(vals)
-            if row:
-              save history
-              make insertions
-        """
-        if date == None:
-            date = self.today()
-
-        if keyIndex == None:
-            keyIndex = 0
-            
-        key = self.fieldNames[keyIndex]
-
-        old = self._db._c.execute("SELECT * FROM " + self.tableName +
-                                  " WHERE " + key + " = ?",
-                                  (fieldValues[keyIndex],))
-        rows = self._db._c.fetchall()
-
-        if len(rows) > 1:
-            rows = []
-            print("Err: Too many matches")
-
-        # If there is a return here, we're probably going to change this
-        # table entry.  Record the current state in the history table,
-        # if there is one.
-        if rows and (self.autoHistory or recordHistory):
-            self.recordHistory(rows[0], date, note)
-
-        # Return the original value of the row to be updated.
-        return rows[0]
-
-    def recordHistory(self, record, date=None, note=" "):
+    def insertHistoryRecord(self, record, date=None, note=" "):
         """
         Records a database record, with date and note, in the history
         table, if there is one.
         """
-
-        if self.historyTableName == "none":
+        if date == None:
+            date = self.today()
+        
+        if self.historyTableName == None:
             return []
 
         else:
@@ -297,58 +259,98 @@ class DatabaseTable:
 
 
 
-            
-    def update(self, inRecord, keyIndex=None, note="", date=None,
-               recordHistory=False):
+    def update(self, inRecord, keyIndex=None):
         """
         Updates the table to the values in fieldValues.  The primary
         key is taken to be the first one in the list, unless another
-        name is specified with the indexName argument.  Note that the
+        name is specified with the keyIndex argument.  Note that the
         primary key is more or less guaranteed to be unique in the
         table, but others aren't, so you are warned.
 
-        This method also records a note and date in the history table,
-        if there is a history table and autohistory is turned on.
         """
         if keyIndex == None:
             keyIndex = 0
-        
-        if date == None:
-            date = self.today()
-        
-        # Get the row of the table to be updated, and record it in the
-        # history, if appropriate.
-        oldRecord = self.updatePrep(inRecord, recordHistory=recordHistory)
+
+        conditions = ",".join([a + "='" + b + "'" for a,b in
+                               zip(self.fieldNames,inRecord)]) 
 
         # Now figure out what changed, and change it in the table.
-        for head,new,old in zip(self.fieldNames, inRecord, oldRecord):
+        self._db._c.execute("UPDATE " + self.tableName + " SET " +
+                            conditions +
+                            " WHERE " + self.fieldNames[keyIndex] + " = ?",
+                            (inRecord[keyIndex],))
+                
+        self._db._conn.commit()
 
-            if new != old:
-                
-                self._db._c.execute("UPDATE " + self.tableName + " SET " +
-                                    head + " = ? WHERE " +
-                                    self.fieldNames[keyIndex] + " = ?",
-                                    (new, oldRecord[0]))
-                
-                self._db._conn.commit()
-    
+    def setValue(self, keyName, keyValue, valueName, valueValue):
+        """
+        Finds the record where keyName = keyValue, and changes
+        valueName to be valueValue.
+
+        """
+        self._db._c.execute("UPDATE " + self.tableName + " SET " +
+                            valueName + "=" + valueValue +
+                            " WHERE " + keyName + "= ?", (keyValue,))
+        
+        self._db._conn.commit()
+
+    def setValueDouble(self, firstKeyName, firstKeyValue,
+                       secondKeyName, secondKeyValue,
+                       valueName, valueValue):
+        """
+        Same as setValue(), but with two conditions.  This is mostly
+        useful for bulbs, that have a serial number and a 'life' value
+        to identify them. 
+        """
+        
+        self._db._c.execute("UPDATE " + self.tableName + " SET " +
+                            valueName + "=" + valueValue +
+                            " WHERE " + firstKeyName + "= ? AND " +
+                            secondKeyName + "= ?",
+                            (firstKeyValue, secondKeyValue))
+        
+        self._db._conn.commit()
+        
+    def getValue(self, keyName, keyValue, valueName):
+        """
+        Recovers the value of the valueName where the given key has
+        the given value.
+        """
+        self._db._c.execute("SELECT " + valueName + " FROM " +
+                            self.tableName + " WHERE " + keyName +
+                            " = ?", (keyValue,))
+        
+        
+    def getRecord(self, primaryKey):
+
+        self._db._c.execute("SELECT * FROM " + self.tableName +
+                            " WHERE " + self.fieldNames[0] +
+                            " = ?", (primaryKey,))
+
+        return self._db._c.fetchone()
+        
+    def recordHistory(self, primaryKey, date, note):
+
+        record = self.getRecord(primaryKey)
+
+        self.insertHistoryRecord(record, date, note)
+        
         
 class ProjectorSettingsTable(DatabaseTable):
 
     def __init__(self, db):
         DatabaseTable.__init__(self, db,
                                "ProjectorSettings",
-                               "ProjectorSettingsHistory",
-                               False)
+                               "ProjectorSettingsHistory")
 
-    def addProjector(self, projSerial, mfgDate):
-        pass
+    def addProjector(self, projSerial):
 
-    def setSettings(self, projNumber=None, projSerial=None):
-        pass
+        self.insert((projSerial,) + ("0",) * (len(self.fieldValues) - 1))
+        
 
-    def recordSettings(self, projNumber=None, projSerial=None):
-        pass
+    def setSettings(self, projSerial, settings):
+
+        self.update((projSerial,) + settings, 0)
 
         
 class ProjectorStatus(DatabaseTable):
@@ -356,8 +358,44 @@ class ProjectorStatus(DatabaseTable):
     def __init__(self, db):
         DatabaseTable.__init__(self, db,
                                "ProjectorStatus",
-                               "ProjectorStatusHistory",
-                               True)
+                               "ProjectorStatusHistory")
+
+    def addProjector(self, projSerial, mfgDate, lensType):
+
+        self.insert((projSerial, mfgDate) + ("0",) * 4 +
+                    (lensType,) + ("0",) * 3)
+        
+    def setErrorRecord(self, projSerial, errors):
+
+        self.setValue("projSerial", projSerial, "errorRecord", errors)
+
+    def setNumber(self, projSerial, projNumber):
+
+        self.setValue("projSerial", projSerial, "projNumber", projNumber)
+
+    def getSerialFromNumber(self, projNumber):
+
+        return self.getValue("projNumber", projNumber, "projSerial")
+        
+    def setHours(self, projSerial, hours):
+
+        self.setValue("projSerial", projSerial, "totalHours", hours)
+        
+    def setLens(self, projSerial, newLens):
+
+        self.setValue("projSerial", projSerial, "lensType", newLens)
+
+    def setLocation(self, projSerial, newLocation):
+
+        self.setValue("projSerial", projSerial, "onSite", newLocation)
+        
+    def setRepair(self, projSerial, repairID):
+
+        self.setValue("projSerial", projSerial, "repairID", repairID)
+        
+    def setStatus(self, projSerial, newStatus):
+        
+        self.setValue("projSerial", projSerial, "projStatus", newStatus)
         
     def show(self, projectorSerial="*"):
         """
@@ -417,29 +455,68 @@ class ProjectorNumbers(DatabaseTable):
     def __init__(self, db):
         DatabaseTable.__init__(self, db,
                                "ProjectorNumbers",
-                               "none",
-                               False)
-        
+                               None)
+
+
 class ProjectorRepairs(DatabaseTable):
         
     def __init__(self, db):
         DatabaseTable.__init__(self, db,
                                "ProjectorRepairs",
-                               "none",
-                               False)
+                               None)
 
+    def newRecord(self, projSerial, repairType, repairedBy, date, repairNote):
+        """
+        Generate a new unique repairID and then use that to add a new
+        repair record.
+        """
+        # Generate new ID.
+        newRepairID = self.getNextIndex("repairID")
+        
+        # Insert new record.
+        self.insert((newRepairID,) +
+                    (projSerial, repairType, repairedBy, date, repairNote))
+
+        return newRepairID        
+        
 
 class BulbStatus(DatabaseTable):
         
     def __init__(self, db):
         DatabaseTable.__init__(self, db,
                                "BulbStatus",
-                               "BulbStatusHistory",
-                               True)
+                               "BulbStatusHistory")
 
 
+    def addBulb(self, bulbSerial, bulbLife):
 
-#######################
+        # Generate new bulb ID
+        newRepairID = self.getNextIndex("bulbID")
+
+        # Add the data to the table.
+        self.insert((bulbID, bulbSerial, bulbLife) + ("0",) * 6)
+
+    def setLampHours(self, bulbID, hours):
+
+        self.setValue("bulbID", bulbID, "lampHours", hours)
+        
+    def setProjSerial(self, inBulb, inLife, projSerial):
+
+        self.setValueDouble("bulbSerial", inBulb, "bulbLife", inLife,
+                            "projSerial", projSerial)
+
+    def setRepair(self, inBulb, inLife, rID):
+
+        self.setValueDouble("bulbSerial", inBulb, "bulbLife", inLife,
+                            "repairID", rID)
+
+    def setStatus(self, inBulb, inLife, status):
+
+        self.setValueDouble("bulbSerial", inBulb, "bulbLife", inLife,
+                            "bulbStatus", status)
+
+        
+
 
 class InventoryDatabaseManager:
     """
@@ -470,11 +547,11 @@ class InventoryDatabaseManager:
     def __init__(self,dbFilename):
         self._db = InventoryDatabase(dbFilename)
 
-        self.projSettings = self._db.ProjectorSettingsTable(p)
-        self.projStatus = self._db.ProjectorStatus(p)
-        self.projNumbers = self._db.ProjectorNumbers(p)
-        self.projRepairs = self._db.ProjectorRepairs(p)
-        self.bulbStatus = self._db.BulbStatus(p)
+        self.projSettings = ProjectorSettingsTable(self._db)
+        self.projStatus = ProjectorStatus(self._db)
+        self.projNumbers = ProjectorNumbers(self._db)
+        self.projRepairs = ProjectorRepairs(self._db)
+        self.bulbStatus = BulbStatus(self._db)
 
         
     def swapProjectors(self, projNumber, outSerial, inSerial, tech,
@@ -482,11 +559,11 @@ class InventoryDatabaseManager:
         if date == None:
             date = self._db.today()
 
-        self.projStatus.record(inSerial, date, repairNote)
-        self.projStatus.record(outSerial, date, repairNote)
+        self.projStatus.recordHistory(inSerial, date, repairNote)
+        self.projStatus.recordHistory(outSerial, date, repairNote)
 
         # Change projector serial in position table.
-        self.projNumbers.setNumber(projNumber, inSerial)
+        self.projStatus.setNumber(inSerial, projNumber)
         
         # Change status of inSerial.
         self.projStatus.setStatus(inSerial, "broken")
@@ -497,12 +574,12 @@ class InventoryDatabaseManager:
         # Record repair -- uninstall and install
         r = self.projRepairs.newRecord(outSerial, "uninstall from " +
                                        str(projNumber), tech,
-                                       repairNote, date)
+                                       date, repairNote)
         projStatus.setRepair(outSerial, r)
 
         r = self.projRepairs.newRecord(inSerial, "install at " +
                                        str(projNumber),  
-                                       tech, repairNote, date)
+                                       tech, date, repairNote)
         projStatus.setRepair(inSerial, r)
             
 
@@ -513,7 +590,7 @@ class InventoryDatabaseManager:
 
         # Record repair
         r = self.projRepairs.newRecord(projSerial, repairType, tech,
-                                       repairNote, date)
+                                       date, repairNote)
 
         # Change projector status
         self.projStatus.setRepair(projSerial, r)
@@ -525,11 +602,11 @@ class InventoryDatabaseManager:
         if date == None:
             date = self._db.today()
 
-        self.projStatus.record(projSerial, date, repairNote)
+        self.projStatus.recordHistory(projSerial, date, repairNote)
             
         # Record ship in repair table
         r = self.projRepairs.newRecord(projSerial, "ship", tech,
-                                       repairNote, date) 
+                                       date, repairNote) 
         
         # Change projector status
         self.projStatus.setLocation(projSerial, "off site")
@@ -540,11 +617,11 @@ class InventoryDatabaseManager:
         if date == None:
             date = self._db.today()
 
-        self.projStatus.record(projSerial, date, repairNote)
+        self.projStatus.recordHistory(projSerial, date, repairNote)
 
         # Record receipt in repair table
         r = self.projRepairs.newRecord(projSerial, "received", tech,
-                                       repairNote, date)
+                                       date, repairNote)
         self.projStatus.setRepair(projSerial, r)
         
         # Change projector status
@@ -557,11 +634,11 @@ class InventoryDatabaseManager:
         if date == None:
             date = self._db.today()
 
-        self.projStatus.record(projSerial, date, repairNote)            
+        self.projStatus.recordHistory(projSerial, date, repairNote)            
             
         # Record repair in repair table
         r = self.projRepairs.newRecord(projSerial, "bulb", tech,
-                                       repairNote, date)
+                                       date, repairNote)
         
         # Record repair in projector status table.
         self.projStatus.setRepair(projSerial, r, date, note)
@@ -585,11 +662,11 @@ class InventoryDatabaseManager:
         if date == None:
             date = self._db.today()
 
-        self.projStatus.record(projSerial, date, repairNote)
+        self.projStatus.recordHistory(projSerial, date, repairNote)
             
         # Record repair in repair table.
         r = self.projRepairs.newRecord(projSerial, "lens", tech,
-                                       repairNote + " install " + newLens, date)
+                                       date, repairNote + " install " + newLens)
 
         # Record repair in projector status table.
         self.projStatus.setRepair(projSerial, r, date, repairNote)
@@ -610,24 +687,33 @@ class InventoryDatabaseManager:
         self.bulbStatus.addBulb(bulbSerial, bulbLife)
             
 
-    def setSettings(self, projNumber=None, projSerial=None, date=None):
+    def setSettings(self, projSerial, settings):
         if date == None:
             date = self._db.today()
 
         if projNumber == None and projSerial == None:
             print("No can do.  I need at least a position or a serial number.")
-
+            return
+            
+        if projSerial == None:
+            projSerial = self.projStatus.getSerialFromNumber(projNumber)
+            
         # Change entries in projector settings table.
-        self.projSettings.setSettings(projNumber=projNumber,
-                                      projSerial=projSerial, settings)
+        self.projSettings.setSettings(projSerial, settings)
 
     def recordSettingsHistory(self, projNumber=None,
-                                   projSerial=None, date=None):
+                              projSerial=None, date=None, note=" "):
         if date == None:
             date = self._db.today()
         
-        self.projSettings.recordSettings(projNumber=projNumber,
-                                         projSerial=projSerial, date)
+        if projNumber == None and projSerial == None:
+            print("No can do.  I need at least a position or a serial number.")
+            return
+
+        if projSerial == None:
+            projSerial = self.projStatus.getSerialFromNumber(projNumber)
+            
+        self.projSettings.recordHistory(projSerial, date, note)
     
     def recordLampHours(self, hours, bulbID=None,
                         projNumber=None, projSerial=None):
@@ -636,9 +722,10 @@ class InventoryDatabaseManager:
         
             if projNumber == None and projSerial == None:
                 print("No can do. Need at least a position or a serial number.")
-
+                return
+                
             if projSerial == None:
-                projSerial = self.projNumbers.getSerial(projNumber)
+                projSerial = self.projStatus.getSerialFromNumber(projNumber)
         
             # Record in bulb status table.
             self.bulbStatus.setLampHours(hours, projSerial=projSerial)
@@ -653,7 +740,7 @@ class InventoryDatabaseManager:
             print("No can do.  I need at least a position or a serial number.")
 
         if projSerial == None:
-            projSerial = self.projNumbers.getSerial(projNumber)
+            projSerial = self.projStatus.getSerialFromNumber(projNumber)
         
         # Record in projector status table.
         self.projStatus.setHours(projSerial, hours)
@@ -673,371 +760,7 @@ class InventoryDatabaseManager:
 
         self.bulbStatus.show(bulbID)
 
-
-##############################
-
-
-        
-    def updateLampHoursInTable(self, bulbID, lampHours):
-        """
-        Input: bulbID, lampHours
-        Output: None
-        Purpose: update the lampHours in the Bulb Current Status Table
-        """
-        self._c.execute("UPDATE BulbStatus SET lampHours = ? WHERE bulbID = ?",(lampHours,bulbID,))
-        self._conn.commit()
-
-    def insertIntoBulbStatusHistoryTable(self,bulbID, bulbSerial, bulbLife, bulbStatus, projSerial, dateIn, dateOut, lampHours, bulbHistNote):
-        """
-        Input: bulbID,
-               bulbSerial (bulb serial number or unknown)
-               bulbLife (0 if it is on its first life)
-               bulbStatus (in use, broken, spare at the time)
-               projSerial (projector bulb was installed in, 'na' if it was spare or broken)
-               dateIn (date projector was put in this status)
-               dateOut (date projector was removed from this status)
-               lampHours (hours on the bulb at the time of its removal)
-               bulbHistNote (miscellaneous notes)
-        Output: None
-        Purpose: Keep a log of everything that happens to the bulbs
-               
-        """
-        self._c.execute("INSERT INTO BulbStatusHistory(bulbID, bulbSerial, bulbLife, bulbStatus, projectorSerial, dateIn, dateOut, lampHours, bulbHistNote) VALUES (?,?,?,?,?,?,?,?,?)",
-                 (bulbID, bulbSerial, bulbLife, bulbStatus, projSerial, dateIn, dateOut, lampHours, bulbHistNote))
-        self._conn.commit()
-
-    def getBulbID(self, bulbSerial, projectorSerial):
-        """
-        Input: bulb Serial Number or 'unknown'
-               projectorSerial Number or 'unknown'
-        Output: bulbID or Error String
-        Purpose: Ideally query the database to find out the bulbID, this 
-               method is there to help if you know the bulb serial number 
-               or the current projector serial number
-        """
-        if bulbSerial is not 'unknown':
-            self._c.execute("SELECT bulbID FROM BulbStatus WHERE bulbSerial = ?",(bulbSerial,))
-            rowRaw = self._c.fetchall()
-            row = str(rowRaw.pop())
-            bulbID = self.fixString(row)
-            return bulbID
-        
-        if projectorSerial is not 'unknown':
-            self._c.execute("SELECT bulbID FROM BulbStatus WHERE projectorSerial = ?",(projSerial,))
-            rowRaw = self._c.fetchall()
-            row = str(rowRaw[0])
-            bulbID = self.fixString(row)
-            return bulbID
-        errorMessage = 'Please look through database to find bulbID'
-        return errorMessage
-
-    def getBulbLife(self,bulbID):
-        """
-        Input: bulbID
-        Output: Current Life of the bulb (amount of times it has been relamped)
-        Purpose: Queries the database for the reLamped method to find out how many times a certain bulb has
-                 been reLamped
-        """
-        self._c.execute("SELECT bulbLife FROM BulbStatus WHERE bulbID = ?",(bulbID,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw.pop())
-        bulbLife = self.fixString(row)
-        return bulbLife
-
-    def insertIntoProjectorSettingsTable(self,serial, mfgDate, date, lens, rOff, gOff, bOff, rGain, gGain, bGain, temp, gamma):
-        """
-        Input: serial number of the projector
-               mfgDate manufacturing date of the projector
-               lens (short or long)
-               Color Settings: red offset, green offset, blue offset
-                               red gain, green gain, blue gain, colorTemp, gamma
-        Output: None
-        Purpose: This method is only used when a brand new projector is added to the sytem, all
-                 of the values are static
-        """
-        self._c.execute("INSERT INTO ProjectorSettings(projectorSerial, mfgDate, lastUpdated, lensType, redOffset, greenOffset, blueOffset, redGain, greenGain, blueGain, colorTemp, gamma) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                  (serial, mfgDate, date, lens, rOff, gOff, bOff, rGain, gGain, bGain, temp, gamma))
-        self._conn.commit()
-
-    def updateProjectorSettingsTable(self,serial, updatedOn, newLens, NewrOff, NewgOff, NewbOff, NewrGain, NewgGain, NewbGain, newTemp, newGamma, note):
-        """
-        Input: serial number of the projector
-               updatedOn date today
-               Color settings - changes if there are any, 'none' if there isn't one
-               note - miscellaneous notes
-        Output: None
-        Purpose: Updates the projectors table if there is a change to its color settings, stores changes in a history table
-        """
-
-        #prevDateIn
-        self._c.execute("SELECT lastUpdated FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        prevDateIn = self.fixString(row)
-
-        #oldLens
-        self._c.execute("SELECT lensType FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldLens = self.fixString(row)
-
-        #oldRoff
-        self._c.execute("SELECT redOffset FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldRoff = self.fixString(row)
-
-         #oldGoff
-        self._c.execute("SELECT greenOffset FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldGoff = self.fixString(row)
-        
-         #oldBoff
-        self._c.execute("SELECT blueOffset FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldBoff = self.fixString(row)
-        
-         #oldRgain
-        self._c.execute("SELECT redGain FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldRgain = self.fixString(row)
-        
-         #oldGgain
-        self._c.execute("SELECT greenGain FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldGgain = self.fixString(row)
-        
-         #oldBgain
-        self._c.execute("SELECT blueGain FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldBgain = self.fixString(row)
-        
-         #oldTemp
-        self._c.execute("SELECT colorTemp FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldTemp = self.fixString(row)
-        
-         #oldGamma
-        self._c.execute("SELECT gamma FROM ProjectorSettings WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldGamma = self.fixString(row)
-        self.insertIntoProjetorSettingsHistoryTable(serial, prevDateIn, updatedOn, oldLens, oldRoff, oldGoff, oldBoff, oldRgain, oldGgain, oldBgain, oldTemp, oldGamma, note)
-
-        if updatedOn is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET lastUpdated = ? WHERE projector_serial = ?",(updatedOn,serial,))
-            self._conn.commit()
-        if newLens is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET lensType = ? WHERE projector_serial = ?",(newLens, serial,))
-            self._conn.commit()
-        if NewrOff is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET redOffset = ? WHERE projector_serial = ?",(NewrOff,serial,))
-            self._conn.commit()
-        if NewgOff is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET greenOffset = ? WHERE projector_serial = ?",(NewgOff,serial,))
-            self._conn.commit()
-        if NewbOff is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET blueOffset = ? WHERE projector_serial = ?",(NewbOff,serial,))
-            self._conn.commit()
-        if NewrGain is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET redGain = ? WHERE projector_serial = ?",(NewrGain,serial,))
-            self._conn.commit()
-        if NewgGain is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET greenGain = ? WHERE projector_serial = ?",(NewgGain,serial,))
-            self._conn.commit()
-        if NewbGain is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET blueGain = ? WHERE projector_serial = ?",(NewbGain,serial,))
-            self._conn.commit()
-        if newTemp is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET colorTemp = ? WHERE projector_serial = ?",(newTemp,serial,))
-            self._conn.commit()
-        if newGamma is not 'none':
-            self._c.execute("UPDATE ProjectorSettings SET gamma = ? WHERE projector_serial = ?",(newGamma,serial,))
-            self._conn.commit()
-        
-    def insertIntoProjectorSettingsHistoryTable(self,serial, dateIn, dateOut, lens, rOff, gOff, bOff, rGain, gGain, bGain, temp, gamma, note):
-        """
-        Input: serial number of the projector
-               date into the old settings, date out of the old settings
-               color settings
-               note (miscellaneous notes)
-        Output: None
-        Purpose: Keep log of changes to the projector's color settings
-        """
-        self._c.execute("INSERT INTO ProjectorSettingsHistory(projectorSerial, dateIn, dateOut, lensType, redOffset, greenOffset, blueOffset, redGain, greenGain, blueGain, colorTemp, gamma, settingsNote) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                  (serial, dateIn, dateOut, lens, rOff, gOff, bOff, rGain, gGain, bGain, temp, gamma, note))
-        self._conn.commit()
-
-    def insertIntoProjectorStatusTable(self,serial, status, onSite, projNumber, dateIn, totalHours, errorRec):
-        """
-        Input: serial number of the projector
-               status (in use, broken, spare)
-               location (on site or off site)
-               position (which position the projector is located in the YURT or 'na' if broken or spare)
-               dateIn (date projector was placed in the current status)
-               totalHours (number of hours the projector has been in use)
-        Output: None
-        Purpose: Insert rows into the projector current status table
-        
-        """
-        self._c.execute("INSERT INTO ProjectorStatus(projectorSerial, projNumber, dateIn, totalHours, projStatus, onSite, errorRecord) VALUES (?,?,?,?,?,?,?)",
-                  (serial, status, onSite, projNumber, dateIn, totalHours, errorRec))
-        self._conn.commit()
-
-    def updateProjectorStatusTable(self,serial, status, location, position, dateIn, notes):
-        """
-        Input: serial number of the projector
-               new status (in use, broken, spare)
-               new location (on site or off site)
-               new position (location in the YURT or 'na' if broken or spare)
-               dateIn (date the projector was placed in this new status)
-               notes (miscellaneous notes
-        Output: None
-        Purpose: update a row in the projector current status table as well as take the previous
-                 status and update the projector history table
-        
-        """
-        #Oldlocation
-        self._c.execute("SELECT onScreen FROM ProjectorStatus WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldLocation = self.fixString(row)
-        
-        #Oldstatus
-        self._c.execute("SELECT projStatus FROM ProjectorStatus WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldStatus = self.fixString(row)
-        
-        #dateIn Previous Status
-        self._c.execute("SELECT dateIn FROM ProjectorStatus WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        dateInPrevStatus = self.fixString(row)
-        
-        #oldPosition
-        self._c.execute("SELECT projNumber FROM ProjectorStatus WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        oldPosition = self.fixString(row)
-        
-        #totalHours
-        self._c.execute("SELECT totalHours FROM ProjectorStatus WHERE projector_serial = ?",(serial,))
-        rowRaw = self._c.fetchall()
-        row = str(rowRaw[0])
-        totalHours = self.fixString(row)    
-
-        self.insertIntoProjectorStatusHistoryTable(serial, oldPosition, dateInPrevStatus, dateIn, totalHours, oldStatus, oldLocation, notes) 
-
-        if status is not 'none':
-            self._c.execute("UPDATE ProjectorStatus SET projStatus = ? WHERE projector_serial = ?",(status,serial,))
-            self._conn.commit()
-        if location is not 'none':
-            self._c.execute("UPDATE ProjectorStatus SET onScreen = ? WHERE projector_serial = ?",(location,serial,))
-            self._conn.commit()
-        if position is not 'none':
-            self._c.execute("UPDATE ProjectorStatus SET projNumber = ? WHERE projector_serial = ?",(position,serial,))
-            self._conn.commit()
-        if dateIn is not 'none':
-            self._c.execute("UPDATE ProjectorStatus SET dateIn = ? WHERE projector_serial = ?",(dateIn,serial,))
-            self._conn.commit()
-            
-    def updateTotalHoursInTable(self,serial, totalHours):
-        """
-        Input: serial number of the projector
-               totalHours of the projector
-        Output: None
-        Purpose: update the total hours on a projector in the current status table
-        """
-        self._c.execute("UPDATE ProjectorStatus SET totalHours = ? WHERE projectorSerial = ?",(totalHours,serial,))
-        self._conn.commit()
-        
-    def insertIntoProjectorStatusHistoryTable(self,serial, position, dateIn, dateOut, totalHours, status, location, notes):
-        """
-        Input: serial number of the projector
-               old status (in use, broken, spare)
-               old location (on site or off site)
-               old position (index of position in the YURT or na if it was broken/spare)
-               dateIn (date placed in this status)
-               dateOut (date removed from this status)
-               totalHours (hours projector had been used up until this point in time)
-               notes (miscellaneous notes)
-        Output: None
-        Purpose: Keep a log of all of the things that happen to the projector
-        """
-        self._c.execute("INSERT INTO ProjectorStatusHistory(projectorSerial, projNumber, dateIn, dateOut, totalHours, projStatus, onSite, projHistNote) VALUES (?,?,?,?,?,?,?,?)",
-                  (serial, position, dateIn, dateOut, totalHours, status, location, notes))
-        self._conn.commit()
-
-    def insertIntoProjectorRepairTable(self,projSerial, date, repair, repairedBy, note):
-        """
-        Input: serial number of the projector,
-               date of repair (year-month-date) Ex/ 2016-01-05 is January 5, 2016
-               repair type (install, uninstall, bulb, board, ship)
-               repaired By (who repaired projector),
-               note (miscellaneous notes)
-        Output: None
-        Purpose: Logging a new repair 
-        """
-        repairIndex = self.getRepairIndex()
-        self._c.execute("INSERT INTO ProjectorRepairs(repairID, projector_serial, repairDate, repairType, repairedBy, repairNote) VALUES (?,?,?,?,?,?)",
-                 (repairIndex, projSerial, date, repair, repairedBy, note))
-        self._conn.commit()           
-
-    def insertIntoProjectorPositions(self,position,location,serialSwitch,serialPort,server,display):
-        """
-        Input: position (number index that represents a position in the YURT)
-               location (wall, door, ceiling) location of the position
-               Attributes unique to a position:
-               serialSwitch
-               serialPort
-               projServer
-               projDisplay
-        Output: None
-        Purpose: Solely for the initial buildup of the ProjectorPositions Table. The ProjectorPositions Table is not modified
-                 once all of the rows have been inserted into the table.
-        
-        """
-        self._c.execute("INSERT INTO ProjectorPositions(projNumber, onScreen, serialSwitch, serialPort, projServer, projDisplay) VALUES (?,?,?,?,?,?)",
-                 (position, location, serialSwitch, serialPort, server, display))
-        self._conn.commit()           
-
-    def getProjectorPositionData(self, projNumber):
-
-        self._c.execute("SELECT projectorSerial,serialSwitch,serialPort FROM ProjectorPositions WHERE projNumber = ?", (projNumber,))
-
-    def recordErrorRecord(self, projSerial, errorRecord):
-
-        # We don't need to record the error record history, since it
-        # is a history.
-        self._c.execute("UPDATE ProjectorStatus SET errorRecord = ? WHERE projectorSerial = ?", (errorRecord, projSerial))
-        
-
-class aInventoryDatabaseManager:
-    """
-    The Inventory Database Manager object is the one used by the user.
-    Ex/ to work with YurtInventory.db
-    dbm = InventoryDatabaseManager('YurtInventory')
-    """
-
-    def __init__(self,dbFilename):
-        self._db = InventoryDatabase(dbFilename)
-
-
-    def getProjectorPositionData(self, projNumber):
-        return self._db.getProjectorPositionData(projNumber)
-
-    def recordErrorRecord(self, projSerial, errorRecord):
-        return self._db.recordErrorRecord(projSerial, errorRecord)
-
-    def getErrorRecord(self, projSerial):
-        return self._db.getErrorRecord(projSerial)
+######################
         
     def checkInputtedStatus(self, status):
         """
@@ -1109,192 +832,6 @@ class aInventoryDatabaseManager:
             return False
         return True       
 
-    def newProjector(self, serial, status, location, position, date, mfgDate, lens, rOff, gOff, bOff, rGain, gGain, bGain, temp, gamma):
-        """
-        Input: serial number
-               status (in Use, Spare, Broken),
-               onSite (on site or off site),
-               manufacturing date, 
-               Color settings: Red Offset, Green Offset, Blue Offset, Red Gain, Green Gain, Blue Gain, Temp, Gamma
-        Output: None
-        Purpose: Adding a new projector to the system, if the projector is in use right away,
-                 this method will prompt two more inputs: repairedBy and repairNotes to add to the
-                 Projector Repairs Log
-        """
-        if self.checkInputtedStatus(status) == False or self.checkInputtedLocation(location) == False or self.checkInputtedLens(lens) == False or self.checkInputtedDate(date) == False:
-            return
-        
-        self._db.insertIntoProjectorSettingsTable(serial, mfgDate, date, lens, rOff, gOff, bOff, rGain, gGain, bGain, temp, gamma)
-        totalHours = 0
-        self._db.insertIntoProjectorStatusTable(serial, position, date, status, location, totalHours)
-
-        if status == 'in use':
-            repairedBy = input("Who installed the projector?")
-            notes = input("Any Notes?")
-            self._db.insertIntoProjectorRepairTable(serial,  date, 'install', repairedBy, notes)
-
-    def uninstallProjector(self, serial, newStatus, newLocation, date, uninstalledBy, note):
-        """
-        Input: serial number of the projector
-               newStatus of the projector (spare or broken, most likeley broken)
-               newLocation of the projector (on site or off site)
-               date (date of uninstallation year-month-day Ex/ 2016-01-05 is January 5, 2016
-               uninstalledBy (who uninstalled the projector)
-               note (Miscellaneous note)
-        Output: None
-        Purpose: Uninstalling a projector updates the projector's current status and creates a
-                 repair record. Updating the current status will automatically change the projector
-                 history table.
-        """
-        if self.checkInputtedStatus(newStatus) == False or self.checkInputtedLocation(newLocation) == False or self.checkInputtedDate(date) == False:
-            return
-        self._db.updateProjectorStatusTable(serial, 'na', date, newStatus, newLocation)
-        self._db.insertIntoProjectorRepairTable(serial,date,'uninstall',uninstalledBy, note)
-            
-    def installProjector(self, serial, position, date, installedBy, note):
-        """
-        Input: serial number of the projector
-               position the projector is installed to (index)
-               date of the installation
-               installedBy (who installed it)
-               note (miscellaneous notes)
-        Output: None
-        Purpose: This method, unlike newProjector() assumes the projector is already in the system
-                 and is now being installed. This method updates the status of the projector and
-                 logs the installation in the Projector Repair Table.
-        """
-        if self.checkInputtedDate(date) == False:
-            return
-        self._db.updateProjectorStatusTable(serial,position,date,'in use','on site',note)
-        self._db.insertIntoProjectorRepairTable(serial, date, 'install', installedBy, note)
-
-    def shipProjector(self, serial, status, date, whereTo, note):
-        """
-        Input: serial number of the projector
-               status (in use, spare, broken) - most likely broken
-               date today (year-month-day Ex/ 2016-01-05 is January 5, 2016)
-               whereTo - where the projector is being shipped to
-               note (miscellaneous notes) 
-        Output: None
-        Purpose: Updates the current status of the projector if it is shipped off-site,
-                 most likeley for repairs. Adds this to the projector repair table.
-        """
-        if self.checkInputtedStatus(status) == False or self.checkInputtedDate(date) == False:
-            return
-        self._db.updateProjectorStatusTable(serial, 'na',date,status,'off site',note)
-        self._db.insertIntoProjectorRepairTable(serial, date, 'ship',whereTo, note)
-
-    def recievedProjector(self, serial,status,date,enteredBy, note):
-        """
-        Input: serial number of the projector
-               status (in use, spare, broken) - most likely broken
-               date today (year-month-day Ex/ 2016-01-05 is January 5, 2016)
-               enteredBy (whoever is responsible for recieving the Projector)
-               note (miscellaneous notes) Ex/ Recieved from Taiwan
-        Output: None
-        Purpose: Updates the current status and repair record of the projector when it is recieved. 
-        """
-        if self.checkInputtedStatus(status) == False or self.checkInputtedDate(date) == False:
-            return
-        self._db.updateProjectorStatusTable(serial, 'na',date,status, 'on site',note)
-        self._db.insertIntoProjectorRepairTable(serial,date,'recieved',enteredBy,note)
-
-    def fixedProjector(self, serial, date, fixedBy, note):
-        """
-        Input: serial number of projector
-               date today (year-month-day Ex/ 2016-01-05 is January 5, 2016)
-               fixedBy (whoever fixed the projector)
-               note (miscellaneous notes)
-        Output: None
-        Purpose: Udates current status of projector when it is fixed. Logs it into the
-                 Projector Repairs Table.
-        
-        """
-        if self.checkInputtedDate(date) == False:
-            return
-        self._db.updateProjectorStatusTable(serial,'na',date,'spare','on site',note)
-        self._db.insertIntoProjectorRepairTable(serial, date, 'fixed', fixedBy, note)
-
-    def projectorBreaks(self, serial, date, note):
-        """
-        Input: serial number of the projector
-               date the projector breaks (year-month-day Ex/ 2016-01-05 is January 5, 2016)
-               note (miscellaneous notes)
-        Output: None
-        Purpose: Updates the current status of projector when it breaks. 
-        """
-        if self.checkInputtedDate(date) == False:
-            return
-        self._db.updateProjectorStatusTable(serial, 'na', date, 'broken', 'on site', note)
-
-    def updateProjectorSettings(self, serial, date, lens, rOff, gOff, bOff, rGain, gGain, bGain, temp, gamma, note):
-        """
-        Input: serial number of the projector
-               date today (year-month-day Ex/ 2016-01-05 is January 5, 2016)
-               lens (new lensType)
-               new Color Settings
-               note
-        Output: None
-        Purpose: on user's call it will update the projector's color settings, and log the old settings in a history table
-       
-        """
-        if self.checkInputtedLens(lens) == False or self.checkInputtedDate(date) == False:
-            return
-        self._db.updateProjectorSettingsTable(serial, date, lens, rOff, gOff, bOff, rGain, gGain, bGain, temp, gamma, note)
-
-
-    def newRepair(self, serial, date, repair, repairedBy, note):
-        """
-        Input: serial number of the projector
-               date of repair (year-month-day Ex/ 2016-01-05 is January 5, 2016)
-               repairedBy, note
-        Output: None
-        Purpose: This method is for generic repairs such as board repairs. This method is not
-                 for bulb repairs. 
-        """
-        if self.checkInputtedRepair(repair) == False or self.checkInputtedDate(date) == False:
-            return
-        self._db.insertIntoProjectorRepairTable(serial, date, repair, repairedBy, note)
-
-    def newBulb(self, bulbSerial, bulbLife, status, projSerial, date):
-        """
-        Input: serial number of the bulb (unknown if not known)
-               status (in use, spare, broken),
-               projSerial (serial number of the projector, na if bulb is spare or broken)
-               dateIn (today's date year-month-day Ex/ 2016-01-05 is January 5, 2016),
-               your name
-        Output: None
-        Purpose: Adding a new bulb to the system, if the bulb is being installed, update projector repairs
-        """
-        if self.checkInputtedStatus(status) == False or self.checkInputtedDate(date) == False:
-            return
-
-        lampHours = 0
-        
-        self._db.insertIntoBulbStatusTable(bulbSerial, bulbLife, status, projSerial, date, lampHours)
-
-        if status == 'in use':
-            repairedBy = input("Who installed the bulb into the Projector?")
-            note = input("Any Notes?")
-            self._db.insertIntoProjectorRepairTable(projSerial,date,'bulb',repairedBy,note)
-
-    def uninstallBulb(self, bulbID, projSerial, newStatus, date, uninstalledBy, note):
-        """
-        Input: bulbID (try to query database to find it, if not type idk - should work)
-               projSerial (serial number of the projector)
-               newStatus (broken or spare) of the bulb - most likely broken
-               date (today's date year-month-day Ex/ 2016-01-05 is January 5, 2016)
-               uninstalledBy (whoever uninstalled the bulb)
-               note (Miscellaneous notes)
-        Output: None
-        Purpose: Updating status of the bulb that is being uninstalled and adding a repair record
-        """
-        if self.checkInputtedStatus(newStatus) == False or self.checkInputtedDate(date) == False:
-            return
-        if bulbID == 'idk':
-            bulbID = self._db.getBulbID('unknown',projSerial)
-        self._db.updateBulbStatusTable(bulbID, 'none', newStatus, 'na', date)
-        self._db.insertIntoProjectorRepairTable(projSerial, date, 'bulb', uninstalledBy, 'uninstalled bulb')
 
     def reLampBulb(self, oldBulbID, bulbSerial, newStatus, newProjSerial, date):
         """
@@ -1313,53 +850,6 @@ class aInventoryDatabaseManager:
         bulbLife = str(int(oldLife) + 1)
         self.newBulb(bulbSerial, bulbLife, newStatus, newProjSerial, date)
         
-    def installBulb(self, bulbID, projSerial, date, installedBy, note):
-        """
-        Input: bulbID of the bulb now being installed
-               projSerial (serial number of projector bulb is to be 
-                 installed into)
-               date (today's date year-month-day Ex/ 2016-01-05 is 
-                 January 5, 2016)
-               installedBy (whoever installed the bulb)
-               note (miscellaneous notes)
-        Output: None
-        Purpose: This method is for bulbs that are already in the system 
-                and are being installed, most likely because they have 
-                recently been repaired. 
-        """
-        if self.checkInputtedDate(date) == False:
-            return
-        self._db.updateBulbStatusTable(bulbID, 'none', 'in use', projSerial, date, note)
-        self._db.insertIntoProjectorRepairTable(projSerial, date, 'bulb', installedBy, 'installed bulb')
-
-    def updateLampHours(self, bulbID, lampHours):
-        """
-        Input: bulbID, lampHours
-        Output: None
-        Purpose: Integrate this method with pjcontrol to update the lamp hours of the bulbs
-        """
-        self._db.updateLampHoursInTable(bulbID, lampHours)
-
-    def updateTotalHours(self, serial, totalHours):
-        """
-        Input: bulbID, totalHours
-        Output: None
-        Purpose: Integrate this method with pj-control to update the total hours of the projector
-        """
-        self._db.updateTotalHoursInTable(serial, totalHours)
-
-    def addProjectorPosition(self,index,location,serialSwitch,serialPort,server,display):
-        """
-        Input: index corresponding to position number
-               location (ceiling, wall, or floor)
-               serialSwitch
-               serialPort
-               server
-               display
-        Output: None
-        Purpose: These methods used initially to set up the positions table
-        """
-        self._db.insertIntoProjectorPositions(index,location,serialSwitch,serialPort,server,display)
 
     def runDemo(self):
         """
