@@ -1,0 +1,25 @@
+Report Based on Performance data retrieved on August 27th, 2016
+
+Program init
+Average time: 1.73 secs 
+Minimum time required: 0.21 secs - cave010 0.0
+Maximum time required: 2.59 secs - cave009 0.0
+Standard Deviation: 0.40 secs
+
+Cached file reading:
+Average speed: 0.00327208314264s with a 9.97892MB file ~= 3073.75 MB/s 
+Minimum speed: 0.00267542105263s with a 9.97892MB file ~= 2477.78 MB/s  - cave002 0.2
+Maximum speed: 0.00267542105263s with a 9.97892MB file ~= 3729.85 MB/s  - cave012 0.1
+Standard Deviation: ~ 277.06 MB/s
+
+Non-cached file reading:
+Average speed: 0.377609567447s with a 997.892MB file ~= 2644.77 MB/s 
+Minimum speed: 0.338541230769s with a 997.892MB file ~= 2552.82 MB/s - cave013 0.0
+Maximum speed: 20.338541230769s with a 997.892MB file ~= 2947.62 MB/s  - cave019 0.0
+Standard Deviation: ~ 76.73 MB/s 
+
+Head Tracking
+Average time per event: 0.02409 secs 
+Min head tracking time: 0.02408 secs - cave017:0.1
+Max head tracking time: 0.02410 secs - cave001:0.1
+Standard Deviation: 5.77 millisecs
