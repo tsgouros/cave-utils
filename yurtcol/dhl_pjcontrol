@@ -1,2 +1,4 @@
 #!/bin/csh -f
-echo pjcontrol $* >> pj.out
+touch pj.out
+date >>& pj.out
+pjcontrol $* >>& pj.out

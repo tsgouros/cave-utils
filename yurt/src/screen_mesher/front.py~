@@ -1,0 +1,22 @@
+#
+# create, to stdout, an obj format mesh for the main wall of the yurt
+#
+
+#
+# strategy:
+#     create the spec'ed curve
+#     copy for floor and ceiling
+#     tweak to reflect measured imperfections
+#
+#
+# spec
+#    96" radius for the central portion from -65 to 65 degrees
+#    center axis where back edge of screens end
+#    72" radius for 33.10 degrees more
+#    	 (subtending 25 degrees more at center axis)
+
+
+def output_mesh():
+
+
+
