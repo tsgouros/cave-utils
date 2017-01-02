@@ -4,10 +4,8 @@
 
 
 # TODO
-#   read/write gain file
-#   add gain adjustment commands
-#   display gains
-#   init floor navigation vars
+#   handle eco mode
+
 
 import curses
 import time
