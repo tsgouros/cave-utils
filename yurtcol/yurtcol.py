@@ -67,6 +67,22 @@ def out_gain(stdscr, n) :
     stdscr.addstr(y1, x1, gain_str(p[n].g))
     stdscr.addstr(y2, x2, gain_str(p[n].b))
 
+def eco_str(e) :
+    assert g > 0 and g < 200
+    if e == "eco":
+        return "*"
+    elif e == "std" or e == "unset":
+        return " "
+    assert 0
+
+def out_eco(stdscr, n) :
+    y = p[n].y
+    if (n<50) :
+        x = p[n].x + 2
+    else :
+        x = p[n].x + 8
+    stdscr.addstr(y, x, eco_str(p[n].eco))
+
 
 def out_gains(stdscr) :
     for i in range(69) :
@@ -101,9 +117,6 @@ def out_gains(stdscr) :
 
 
 """
-
-
-
 
 
 def init_gain_coords() :
@@ -271,7 +284,7 @@ def read_config() :
     for i in range(69):
         l = f.readline()
         t = l.split()
-        assert len(t) == 4, "config file error -- line with other than 4 numbers"
+        assert len(t) == 4 or len(t) == 5, "config file error -- line with other than 4 or 5 toks"
         assert int(t[0]) == i, "mismatched projector index"
         p[int(t[0])].r = int(t[1])
         p[int(t[0])].g = int(t[2])
@@ -279,12 +292,20 @@ def read_config() :
         p[int(t[0])].pr = -1        # set value in projector
         p[int(t[0])].pg = -1        # set value in projector
         p[int(t[0])].pb = -1        # set value in projector
+        p[int(t[0])].eco = "unset"  # dummy if config not set
+        p[int(t[0])].peco = "unset" # set value in projector
+        if len(t) == 5:
+            assert t[4] == "eco" or t[4] == "std"
+            p[int(t[0])].eco = t[4]
     f.close()
 
 def write_config() :
     f = open('yurtcol.config', 'w')
     for i in range(69):
-        line = str(i) + "  " + str(p[i].r) + " " + str(p[i].g) + " " + str(p[i].b) + "\n"
+        line = str(i) + "  " + str(p[i].r) + " " + str(p[i].g) + " " + str(p[i].b)
+        if (p[i].eco == "eco" or p[i].eco == "std"):
+            line = line + " " + p[i].eco
+        line = line + "\n"
         f.write(line)
     f.close()
 
@@ -346,6 +367,12 @@ def do_curses(stdscr) :
             # increase blue
             p[curproj].b = min(199,p[curproj].b + 1)
             out_gain(stdscr, curproj)
+        elif (c == ord('e')) :
+            p[curproj].eco = "eco"
+            out_eco(stdscr, curproj)
+        elif (c == ord('s')) :
+            p[curproj].eco = "std"
+            out_eco(stdscr, curproj)
 
         stdscr.addstr(0,0,str(curproj))
         stdscr.addstr(p[curproj].y, p[curproj].x, "")
@@ -378,12 +405,28 @@ def find_all_blue(val, start) :
             ret = ret + "," + str(i)
     return ret
 
+def find_all_eco(val, start) :
+    ret = str(start)
+    for i in range(start+1, 69) :
+        if (p[i].peco != p[i].eco and p[i].eco == val) :
+            ret = ret + "," + str(i)
+    return ret
+
 def build_command(plist, var, val) :
     return "./dhl_pjcontrol " + plist + " raw " + var + " = " + str(val)
+
+def build_command_eco(plist, val) :
+    return "./dhl_pjcontrol " + plist + " " + str(val)
 
 def next_command() :
     for i in range(69) :
         # find first needed change
+        if (p[i].eco != p[i].peco):
+            projectors = find_all_eco(p[i].eco, i)
+            cmd = build_command_eco(projectors, p[i].eco)
+            for n in projectors.split(',') :
+                p[int(n)].peco = p[int(n)].eco
+            return cmd
         val = p[i].r
         if p[i].pr != val :
             projectors = find_all_red(val, i)
@@ -405,7 +448,6 @@ def next_command() :
             for n in projectors.split(',') :
                 p[int(n)].pb = val
             return cmd
-
 
 def threaded_function():
     # keep the projector settings matching the interactive input
