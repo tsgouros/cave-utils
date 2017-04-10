@@ -68,7 +68,6 @@ def out_gain(stdscr, n) :
     stdscr.addstr(y2, x2, gain_str(p[n].b))
 
 def eco_str(e) :
-    assert g > 0 and g < 200
     if e == "eco":
         return "*"
     elif e == "std" or e == "unset":
