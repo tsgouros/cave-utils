@@ -68,18 +68,20 @@ def out_gain(stdscr, n) :
     stdscr.addstr(y2, x2, gain_str(p[n].b))
 
 def eco_str(e) :
-    assert g > 0 and g < 200
     if e == "eco":
-        return "*"
+        return "'"
     elif e == "std" or e == "unset":
+        return "*"
+    elif e == "unset":
         return " "
     assert 0
 
 def out_eco(stdscr, n) :
-    y = p[n].y
     if (n<50) :
-        x = p[n].x + 2
+        y = p[n].y + 3
+        x = p[n].x
     else :
+        y = p[n].y
         x = p[n].x + 8
     stdscr.addstr(y, x, eco_str(p[n].eco))
 
@@ -87,6 +89,7 @@ def out_eco(stdscr, n) :
 def out_gains(stdscr) :
     for i in range(69) :
         out_gain(stdscr, i)
+        out_eco(stdscr, i)
 
 """   screen layout
 
