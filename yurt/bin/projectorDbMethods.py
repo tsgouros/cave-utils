@@ -68,7 +68,6 @@ class DatabaseTable:
     database.  The class can include both a pointer to a table and a
     pointer to a corresponding history table.  If autohistory is True,
     an entry is made in the history table when the table changes.
-
     """
     def __init__(self, database, tableName, historyTableName):
         self._db = database
@@ -173,12 +172,10 @@ class DatabaseTable:
         """
         A generic insert method for database tables.  Accepts a tuple of the
         field values as input, and executes an INSERT with them.
-
         If the primary key is included in the input fieldValues, then
         we check to make sure it is not repeated in the table and
         throw an error if it is.  If it is not included, we try to
         generate a new key value and add the other data to the table.
-
         Returns the value of the primary key inserted, so you can
         retrieve this record with that key.
         """
@@ -266,7 +263,6 @@ class DatabaseTable:
         name is specified with the keyIndex argument.  Note that the
         primary key is more or less guaranteed to be unique in the
         table, but others aren't, so you are warned.
-
         """
         if keyIndex == None:
             keyIndex = 0
@@ -286,12 +282,20 @@ class DatabaseTable:
         """
         Finds the record where keyName = keyValue, and changes
         valueName to be valueValue.
-
         """
+	print "==="
+	print valueValue
+	print "==="
         self._db._c.execute("UPDATE " + self.tableName + " SET " +
-                            valueName + "=" + valueValue +
-                            " WHERE " + keyName + "= ?", (keyValue,))
+                           valueName + "=('" + valueValue +
+                            "')  WHERE " + keyName + "=('" + keyValue + "')")
+        print("UPDATE " + self.tableName + " SET " +
+                           valueName + "=('" + valueValue +
+                            "')  WHERE " + keyName + "=('" + keyValue + "')")
         
+	#self._db._c.execute("UPDATE " + self.tableName + " SET " + 
+	#		    valueName + "==:val_val WHERE " + keyName
+	#		    + "==:key_val", {"val_val": str(valueName), "key_val": str(keyValue)}) 
         self._db._conn.commit()
 
     def setValueDouble(self, firstKeyName, firstKeyValue,
@@ -319,7 +323,9 @@ class DatabaseTable:
         self._db._c.execute("SELECT " + valueName + " FROM " +
                             self.tableName + " WHERE " + keyName +
                             " = ?", (keyValue,))
-        
+        val =  self._db._c.fetchone()
+	print val[0]
+	return str(val[0]) 
         
     def getRecord(self, primaryKey):
 
@@ -345,9 +351,8 @@ class ProjectorSettingsTable(DatabaseTable):
 
     def addProjector(self, projSerial):
 
-        self.insert((projSerial,) + ("0",) * (len(self.fieldValues) - 1))
-        
-
+        self.insert((projSerial,) + ("0",) * 8)
+    
     def setSettings(self, projSerial, settings):
 
         self.update((projSerial,) + settings, 0)
@@ -363,39 +368,51 @@ class ProjectorStatus(DatabaseTable):
     def addProjector(self, projSerial, mfgDate, lensType):
 
         self.insert((projSerial, mfgDate) + ("0",) * 4 +
-                    (lensType,) + ("0",) * 3)
+                    (lensType,) + ("0",) * 2)
         
     def setErrorRecord(self, projSerial, errors):
-
-        self.setValue("projSerial", projSerial, "errorRecord", errors)
+        print "===="
+	print "set error record"
+	print "===="
+        self.setValue("projectorSerial", projSerial, "errorRecord", errors)
 
     def setNumber(self, projSerial, projNumber):
-
-        self.setValue("projSerial", projSerial, "projNumber", projNumber)
+        
+	self.setValue("projectorSerial", projSerial, "projNumber", projNumber)
+    
+    def getAllNumber(self):
+	
+	self._db._c.execute("Select projNumber from ProjectorStatus")
+	rows = self._db._c.fetchall()
+	rst = []
+	for row in rows:
+		print row
+		rst.append(row[0])
+	return rst
 
     def getSerialFromNumber(self, projNumber):
 
-        return self.getValue("projNumber", projNumber, "projSerial")
+        return self.getValue("projNumber", projNumber, "projectorSerial")
         
     def setHours(self, projSerial, hours):
 
-        self.setValue("projSerial", projSerial, "totalHours", hours)
+        self.setValue("projectorSerial", projSerial, "totalHours", hours)
         
     def setLens(self, projSerial, newLens):
 
-        self.setValue("projSerial", projSerial, "lensType", newLens)
+        self.setValue("projectorSerial", projSerial, "lensType", newLens)
 
     def setLocation(self, projSerial, newLocation):
 
-        self.setValue("projSerial", projSerial, "onSite", newLocation)
+        self.setValue("projectorSerial", projSerial, "onSite", newLocation)
         
     def setRepair(self, projSerial, repairID):
 
-        self.setValue("projSerial", projSerial, "repairID", repairID)
+        self.setValue("projectorSerial", projSerial, "repairID", repairID)
         
     def setStatus(self, projSerial, newStatus):
         
-        self.setValue("projSerial", projSerial, "projStatus", newStatus)
+        self.setValue("projectorSerial", projSerial, "projStatus", newStatus)
         
     def show(self, projectorSerial="*"):
         """
@@ -405,7 +422,7 @@ class ProjectorStatus(DatabaseTable):
         we print it out after the table.
         """
         heads = self.fieldNames
-
+	#print projectorSerial
         # Note that apparently table and field names cannot be parameterized
         # in SQLite execute() statements.
         if projectorSerial == "*":
@@ -457,7 +474,22 @@ class ProjectorNumbers(DatabaseTable):
                                "ProjectorNumbers",
                                None)
 
+    #check if this new function is even necessary
+    def newRecord(self, projNumber, onScreen="0", serialSwitch="0", serialPort="0", projServer="0", projDisplay="0"):
+        """
+	Add a new record to the projectorNumber table
+	"""
+	self.insert((projNumber,) + (onScreen, serialSwitch, serialPort, projServer, projDisplay))
 
+    def getSerialPort(self, projNumber):
+	
+	return self.getValue("projNumber", projNumber, "serialPort")
+    
+    def getSerialSwitch(self, projNumber):
+	
+	return self.getValue("projNumber", projNumber, "serialSwitch")
+    ###########
+	
 class ProjectorRepairs(DatabaseTable):
         
     def __init__(self, db):
@@ -491,14 +523,15 @@ class BulbStatus(DatabaseTable):
     def addBulb(self, bulbSerial, bulbLife):
 
         # Generate new bulb ID
-        newRepairID = self.getNextIndex("bulbID")
+        bulbID = self.getNextIndex("bulbID")
 
         # Add the data to the table.
         self.insert((bulbID, bulbSerial, bulbLife) + ("0",) * 6)
 
-    def setLampHours(self, bulbID, hours):
-
-        self.setValue("bulbID", bulbID, "lampHours", hours)
+    def setLampHours(self, bulbID,  hours):
+	
+	if bulbID != None:
+        	self.setValue("bulbID", bulbID, "lampHours", hours)
         
     def setProjSerial(self, inBulb, inLife, projSerial):
 
@@ -523,26 +556,20 @@ class InventoryDatabaseManager:
     The Inventory Database Manager object is the one used by the user.
     Ex/ to work with YurtInventory.db
     dbm = InventoryDatabaseManager('YurtInventory')
-
     Operations supported:
-
     Swap projector
     Repair projector
     Ship away for repair
     Return repaired projector to inventory
     Change bulb on projector
-
     Add projector
     Add bulb or Fix bulb (relamping)
-
     Record color settings
     Record lamp hours
     Record projector hours
     Record error record
-
     Projector report
     Bulb report
-
     """
     def __init__(self,dbFilename):
         self._db = InventoryDatabase(dbFilename)
@@ -582,12 +609,14 @@ class InventoryDatabaseManager:
                                        tech, date, repairNote)
         projStatus.setRepair(inSerial, r)
             
-
+    # should we give a default value to tech too?
     def repairProjector(self, projSerial, repairType, tech, newStatus=None, 
-                        repairNote=" ", date=None):
+                        repairNote="0", date=None):
         if date == None:
             date = self._db.today()
-
+	
+	if tech == None:
+	    tech = "0"
         # Record repair
         r = self.projRepairs.newRecord(projSerial, repairType, tech,
                                        date, repairNote)
@@ -595,6 +624,7 @@ class InventoryDatabaseManager:
         # Change projector status
         self.projStatus.setRepair(projSerial, r)
         if newStatus != None:
+	    print newStatus
             self.projStatus.setStatus(projSerial, newStatus)
             
 
@@ -675,25 +705,38 @@ class InventoryDatabaseManager:
     def addProjector(self, projSerial, mfgDate, lens):
 
         # Add projector to projector status table.
-        self.projSettings.addProjector(projSerial, mfgDate)
-        self.projStatus.addProjector(projSerial, lensType)
-        
+        self.projSettings.addProjector(projSerial)
+        self.projStatus.addProjector(projSerial, mfgDate, lens)
+    
+    #######I added these functions, not sure if it is even necessary######
+    def addProjectorNumber(self, projSerial, projNumber):
+	self.projStatus.setNumber(projSerial, projNumber)
+
+
+    def instProjector(self, projNumber, onScreen, serialSwitch, serialPort, projServer, projDisplay):
+	self.projNumbers.newRecord(projNumber, onScreen, serialSwitch, serialPort, projServer, projDisplay)
+
+    def getSendCmdProperties(self, projNumber):
+	serialSwitch = self.projNumbers.getSerialSwitch(projNumber)
+	serialPort  = self.projNumbers.getSerialPort(projNumber)
+	return [serialSwitch, serialPort]
+    ######################################################################
 
     def addBulb(self, bulbSerial, bulbLife, date=None):
         if date == None:
-            date = self._db.today()
+            date = self.bulbStatus.today()
 
         # Add bulb to bulb status table.
         self.bulbStatus.addBulb(bulbSerial, bulbLife)
             
 
     def setSettings(self, projSerial, settings):
-        if date == None:
-            date = self._db.today()
+        #if date == None:
+            #date = self._db.today()
 
-        if projNumber == None and projSerial == None:
-            print("No can do.  I need at least a position or a serial number.")
-            return
+        #if projNumber == None and projSerial == None:
+            #print("No can do.  I need at least a position or a serial number.")
+            #return
             
         if projSerial == None:
             projSerial = self.projStatus.getSerialFromNumber(projNumber)
@@ -733,7 +776,13 @@ class InventoryDatabaseManager:
         else:
 
             self.bulbStatus.setLampHours(hours, bulbID=bulbID)
-            
+    
+    def getProjSerialFromNum (self, projNumber):
+	return self.projStatus.getSerialFromNumber(projNumber)
+    
+    def getAllProjNumber(self):
+	return self.projStatus.getAllNumber()
+	            
     def recordProjectorHours(self, hours, projNumber=None, projSerial=None):
 
         if projNumber == None and projSerial == None:
@@ -747,13 +796,27 @@ class InventoryDatabaseManager:
 
 
     def recordErrorRecord(self, record, projNumber=None, projSerial=None):
-
+	if projNumber == None and projSerial == None:
+ 	    print "Sorry, I need at least the projector number of serial number to set the error record"
+	    exit()
+	
+	if projSerial == None:
+	    projSerial = self.projStatus.getSerialFromNumber(projNumber)
+	    #there should be a better way
+	    if projSerial == None:
+		print "The projector does not exist"
+		exit()
         # Record in projector status table.
-        self.projStatus.setErrorRecord(projSerial, errors)
+        self.projStatus.setErrorRecord(projSerial, record)
 
-    def projectorReport(self, projNumber=None, projSerial=None):
-
+    def projectorReport(self, projNumber=None, projSerial="*"):
+	
+	#print projSerial
         self.projStatus.show(projSerial)
+	self.projSettings.show(projSerial)
+	self.projNumbers.show(projSerial)
+	self.projRepairs.show(projSerial)
+	self.bulbStatus.show(projSerial)
 
 
     def bulbReport(self, bulbID="*"):
@@ -907,4 +970,3 @@ class InventoryDatabaseManager:
         print('Time to install the bulb back into ABC')
         self.installBulb('3','ABC','2016-01-10','palak','it works now!')
         keepGoing = input("Continue?")
-    
