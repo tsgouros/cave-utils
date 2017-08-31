@@ -319,7 +319,17 @@ class DatabaseTable:
         self._db._c.execute("SELECT " + valueName + " FROM " +
                             self.tableName + " WHERE " + keyName +
                             " = ?", (keyValue,))
-        
+
+        return self._db._c.fetchone()
+
+    def getAllValues(self, keyName):
+        """
+        Gets all the values of a given key in the table.
+        """
+        self._db._c.execute("SELECT " + keyName + " FROM " + self.tableName)
+
+        return [ col[0] for col in self._db._c.fetchall() ]
+
         
     def getRecord(self, primaryKey):
 
@@ -456,6 +466,13 @@ class ProjectorNumbers(DatabaseTable):
         DatabaseTable.__init__(self, db,
                                "ProjectorNumbers",
                                None)
+
+    def getSwitch(self, projNumber):
+        """
+        Returns a tuple of projector number, switch name, and serial port 
+        number.
+        """
+        
 
 
 class ProjectorRepairs(DatabaseTable):
