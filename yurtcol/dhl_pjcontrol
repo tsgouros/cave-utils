@@ -2,3 +2,5 @@
 touch pj.out
 date >>& pj.out
 pjcontrol $* >>& pj.out
+# echo "pjcontrol $*" >>& pj.out
+# sleep 2

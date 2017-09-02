@@ -378,6 +378,7 @@ def do_curses(stdscr) :
             out_eco(stdscr, curproj)
 
         stdscr.addstr(0,0,str(curproj))
+        stdscr.addstr(0,3,str(count_changes())+"   ")
         stdscr.addstr(p[curproj].y, p[curproj].x, "")
 
 
@@ -420,6 +421,23 @@ def build_command(plist, var, val) :
 
 def build_command_eco(plist, val) :
     return "./dhl_pjcontrol " + plist + " " + str(val)
+
+def count_changes() :
+    ret = 0
+    for i in range(69) :
+        if (p[i].eco != p[i].peco):
+            ret += 1
+        val = p[i].r
+        if p[i].pr != val :
+            ret += 1
+        val = p[i].g
+        if p[i].pg != val :
+            ret += 1
+        val = p[i].b
+        if p[i].pb != val :
+            ret += 1
+    return ret
+
 
 def next_command() :
     for i in range(69) :
