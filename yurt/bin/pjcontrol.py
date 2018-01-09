@@ -129,16 +129,16 @@ class ProjectorControl(object):
         """
         if self.projector != "none":
             print "proj{0}".format(self.number), self.serialSwitch, self.switchPort, "cmd =", cmd
-            out = subprocess.check_output(["ssh",
-                                           "cave001",
-                                           "/gpfs/runtime/opt/cave-utils/yurt/bin/pjexpect", 
-                                           "proj{0:02d}".format(self.number),
-                                           "do",
-                                           self.serialSwitch,
-                                           self.switchPort,
-                                           "\"{0}\"".format(cmd)])
+            # out = subprocess.check_output(["ssh",
+            #                                "cave001",
+            #                                "/gpfs/runtime/opt/cave-utils/yurt/bin/pjexpect", 
+            #                                "proj{0:02d}".format(self.number),
+            #                                "do",
+            #                                self.serialSwitch,
+            #                                self.switchPort,
+            #                                "\"{0}\"".format(cmd)])
         
-        return out
+        # return out
 
     def getInt(self, string):
         """
@@ -458,7 +458,8 @@ def parseIntegers(inputStr=""):
 if __name__ == "__main__":
 
     LOGFORMAT = '%(asctime)-15s %(machine)s %(username)s %(message)s'
-    logging.basicConfig(filename='/gpfs/runtime/opt/cave-utils/yurt/log/pjcontrollog.txt', level=logging.DEBUG,format=LOGFORMAT)
+#    logging.basicConfig(filename='/gpfs/runtime/opt/cave-utils/yurt/log/pjcontrollog.txt', level=logging.DEBUG,format=LOGFORMAT)
+    logging.basicConfig(filename='pjcontrollog.txt', level=logging.DEBUG,format=LOGFORMAT)
     logdata = {'username': os.getlogin(),
                'machine':  socket.gethostname()}
     logging.info('pjcontrol %s', " ".join(sys.argv[1:]), extra=logdata)
@@ -534,7 +535,7 @@ if __name__ == "__main__":
 
     #########################################################################
     # Open the shelf file.  It might be empty, so check first.
-    shelf = shelve.open(os.path.expandvars("${PROJECTORDB}"), writeback=True)
+    shelf = shelve.open(os.path.expandvars("../etc/projector.db"), writeback=True)
 
     # Prepare the items on the shelf.
     if "projs" in shelf.keys():
