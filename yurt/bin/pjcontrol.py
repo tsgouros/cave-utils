@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # This is a set of routines meant to ease the pain of managing the
 # collection of video projectors necessary to run the cave, um, I mean
@@ -73,7 +73,7 @@ class RepairRecord(object):
         """
         Prints a nice record of the record.
         """
-        print "  {0} / {1} ({2})".format(self.date, self.repair, self.comment)
+        print("  {0} / {1} ({2})".format(self.date, self.repair, self.comment))
 
 
 class ProjectorControl(object):
@@ -128,7 +128,7 @@ class ProjectorControl(object):
         issuing this command.
         """
         if self.projector != "none":
-            print "proj{0}".format(self.number), self.serialSwitch, self.switchPort, "cmd =", cmd
+            print("proj{0}".format(self.number), self.serialSwitch, self.switchPort, "cmd =", cmd)
             # out = subprocess.check_output(["ssh",
             #                                "cave001",
             #                                "/gpfs/runtime/opt/cave-utils/yurt/bin/pjexpect", 
@@ -190,7 +190,7 @@ class ProjectorControl(object):
         ## properly to the color queries when powered up.
         status = self.send("op status.check ?")
         if status.split()[-1] != '2':
-            print "ERR: Please power on the projector to gather color data and hours."
+            print("ERR: Please power on the projector to gather color data and hours.")
         else: 
             self.recordHours()
             self.recordColorSettings()
@@ -231,15 +231,15 @@ class ProjectorControl(object):
         A pretty-printer for this projector's data.  Could be prettier.
         """
 
-        print "\n=============================="
-        print "Projector: {0}".format(self.number)
+        print("\n==============================")
+        print("Projector: {0}".format(self.number))
         if self.projector == "none":
-            print "S/N:       none"
+            print("S/N:       none")
         else:
-            print "S/N:       {0}".format(projs[self.projector].serialNo)
-        print "Switch:    {0}/{1}".format(self.serialSwitch, self.switchPort)
-        print "Location:  {0}".format(self.location)
-        print "==============================\n"
+            print("S/N:       {0}".format(projs[self.projector].serialNo))
+        print("Switch:    {0}/{1}".format(self.serialSwitch, self.switchPort))
+        print("Location:  {0}".format(self.location))
+        print("==============================\n")
 
         return
 
@@ -321,36 +321,36 @@ class Projector(object):
 
     def pretty(self):
         """ Report writer, preliminary version """
-        print "\n=============================="
-        print "Projector:   {0}".format(self.serialNo) 
-        print "Mfg date:    {0}".format(self.mfgDate)
-        print "Purpose:     {0}".format(self.purpose)
-        print "Lens:        {0}".format(self.lens)
-        print "Total hours: {0}".format(self.totalHours)
-        print "Lamp hours:  {0}\n".format(self.lampHours)
+        print("\n==============================")
+        print("Projector:   {0}".format(self.serialNo) )
+        print("Mfg date:    {0}".format(self.mfgDate))
+        print("Purpose:     {0}".format(self.purpose))
+        print("Lens:        {0}".format(self.lens))
+        print("Total hours: {0}".format(self.totalHours))
+        print("Lamp hours:  {0}\n".format(self.lampHours))
 
-        print "Error record ({0}):".format(self.serialNo)
-        print self.errorRecord
+        print("Error record ({0}):".format(self.serialNo))
+        print(self.errorRecord)
 
         if len(self.records) > 0:
-            print "Repair record ({0}):".format(self.serialNo)
+            print("Repair record ({0}):".format(self.serialNo))
 
             for record in self.records:
                 record.pretty()
-            print " "
+            print(" ")
         
-        print "Color report ({0}):".format(self.serialNo)
-        print "  red.offset   = {0}".format(self.colorSettings[0])
-        print "  green.offset = {0}".format(self.colorSettings[1])
-        print "  blue.offset  = {0}".format(self.colorSettings[2])
+        print("Color report ({0}):".format(self.serialNo))
+        print("  red.offset   = {0}".format(self.colorSettings[0]))
+        print("  green.offset = {0}".format(self.colorSettings[1]))
+        print("  blue.offset  = {0}".format(self.colorSettings[2]))
 
-        print "  red.gain     = {0}".format(self.colorSettings[3])
-        print "  green.gain   = {0}".format(self.colorSettings[4])
-        print "  blue.gain    = {0}".format(self.colorSettings[5])
+        print("  red.gain     = {0}".format(self.colorSettings[3]))
+        print("  green.gain   = {0}".format(self.colorSettings[4]))
+        print("  blue.gain    = {0}".format(self.colorSettings[5]))
 
-        print "  color.temp   = {0}".format(self.colorSettings[6])
-        print "  gamma        = {0}\n".format(self.colorSettings[7])
-        print "==============================\n"
+        print("  color.temp   = {0}".format(self.colorSettings[6]))
+        print("  gamma        = {0}\n".format(self.colorSettings[7]))
+        print("==============================\n")
 
         return
 
@@ -372,13 +372,13 @@ def fullReport(projectors, projectorControls):
     program is a part of one or the other of those collections.
     """
 
-    print "\n\nPROJECTOR CONDITION REPORT"
+    print("\n\nPROJECTOR CONDITION REPORT")
     projKeys = projectors.keys()
     projKeys.sort()
     for k in projKeys:
         projectors[k].pretty()
 
-    print "\n\nPROJECTOR CONTROL REPORT"
+    print("\n\nPROJECTOR CONTROL REPORT")
     projKeys = projectorControls.keys()
     projKeys.sort()    
     for k in projKeys:
@@ -417,7 +417,7 @@ def parseIntegers(inputStr=""):
       5,6,7 --> [5, 6, 7]
     """
 
-    # print ">>", inputStr, "<<<"
+    # print(">>", inputStr, "<<<")
 
     if inputStr == "none":
         return []
@@ -451,7 +451,7 @@ def parseIntegers(inputStr=""):
 
     # Report invalid tokens before returning valid selection
     if len(invalid) > 0:
-        print "Error: invalid projector numbers: " + invalid
+        print("Error: invalid projector numbers: " + invalid)
 
     return list(selection)
 
@@ -468,7 +468,7 @@ if __name__ == "__main__":
     ## TODO: This should not exit, but throw some kind of exception
     ## that if not handled, closes the shelf and exits.
     def abandon(errorString):
-        print "ERR:", errorString
+        print("ERR:", errorString)
         shelf.close()
         exit()
 
@@ -535,7 +535,19 @@ if __name__ == "__main__":
 
     #########################################################################
     # Open the shelf file.  It might be empty, so check first.
-    shelf = shelve.open(os.path.expandvars("../etc/projector.db"), writeback=True)
+    shelf = shelve.open(os.path.expandvars("../etc/projector3.db"), writeback=True)
+
+    # import pickle
+    # projsFile = open("projs.pkl", "rb")
+    # projsPKL = pickle.load(projsFile)
+    # projsFile.close()
+    
+    # projControlsFile = open("projControls.pkl", "rb")
+    # projControlsPKL = pickle.load(projControlsFile)
+    # projControlsFile.close()
+
+    # print(projControlsPKL)
+    # print(projsPKL)
 
     # Prepare the items on the shelf.
     if "projs" in shelf.keys():
@@ -548,6 +560,9 @@ if __name__ == "__main__":
     else:
         shelf["projControls"] = projControls 
 
+#    shelf["projs"] = projsPKL
+#    shelf["projControls"] = projControlsPKL
+    
 
     #########################################################################
     # Run through the projectors gathering their data.
@@ -639,7 +654,7 @@ if __name__ == "__main__":
             if args.purpose != "none":
                 projs[args.serialNo].setPurpose(args.purpose)
 
-            print "added:"
+            print("added:")
             projs[args.serialNo].pretty()
 
             ############### End Add
@@ -667,13 +682,13 @@ if __name__ == "__main__":
 
                         projs[sn].addRecord(args.repairType, args.comment)
 
-                        print "repairing", sn, args.repairType, args.comment
+                        print("repairing", sn, args.repairType, args.comment)
 
-                print "result:"
+                print("result:")
                 projs[sn].pretty()
             ############### End Repair
 
-        #print shelf
+        #print(shelf)
         shelf.close()
         exit()
 
@@ -716,7 +731,7 @@ if __name__ == "__main__":
                 if p not in projControls.keys():
                     abandon("It's probably my fault but I never heard of projector {0}".format(p))
 
-                print "repairing", p, " ".join(args.args[1:])
+                print("repairing", p, " ".join(args.args[1:]))
                 if len(args.args) < 3:
                     abandon("So sorry.  I need a repair type (bulb, ballast, lens, board) and a comment about it to process the record.")
 
@@ -724,7 +739,7 @@ if __name__ == "__main__":
                     abandon("I'm sorry, there seems not to be a projector installed at {0}".format(p))
 
                 projs[projControls[p].projector].addRecord(args.args[1], args.args[2])
-                print "result:"
+                print("result:")
                 projs[projControls[p].projector].pretty()
 
             command = "none"
@@ -749,7 +764,7 @@ if __name__ == "__main__":
                 if p in projControls.keys():
                     # We already have a slot for this, so only need to
                     # update the serial number.
-                    print "Installing {0} at position {1}, switch {2}, port {3}, to be part of the {4}.".format(sn, p, projControls[p].serialSwitch, projControls[p].switchPort, projControls[p].location)
+                    print("Installing {0} at position {1}, switch {2}, port {3}, to be part of the {4}.".format(sn, p, projControls[p].serialSwitch, projControls[p].switchPort, projControls[p].location))
 
                     # Record the projector, but only if there isn't already one there.
                     if projControls[p].projector == "none":
@@ -761,7 +776,7 @@ if __name__ == "__main__":
                     if len(args.args) < 4:
                         abandon("I'm afraid I need the switch and port data for that projector.")
 
-                    print "Installing {0} at position {1}, switch {2}, port {3}, to be part of the {4}.".format(sn, p, args.args[2], args.args[3], args.args[4])
+                    print("Installing {0} at position {1}, switch {2}, port {3}, to be part of the {4}.".format(sn, p, args.args[2], args.args[3], args.args[4]))
                     projControls[p] = ProjectorControl(p, 
                                                        sn,
                                                        args.args[2],
@@ -776,7 +791,7 @@ if __name__ == "__main__":
             for p in projectorsToControl:
 
                 if projControls[p].projector == "none":
-                    print "I'm sorry, there seems not to be a projector installed at {0}".format(p)
+                    print("I'm sorry, there seems not to be a projector installed at {0}".format(p))
                 else:
                 # Record the uninstallation.
 
@@ -820,11 +835,11 @@ if __name__ == "__main__":
             for p in projectorsToControl:
                 if p in projControls.keys():
                     if projControls[p].projector == "none":
-                        print "ERR: I regret that there is no projector installed at {0} at the present.".format(p)
+                        print("ERR: I regret that there is no projector installed at {0} at the present.".format(p))
                     else:
                         if command == "op powoff":
                             projControls[p].recordHours()
-                        print projControls[p].send(command)
+                        print(projControls[p].send(command))
                 else:
                     abandon("So sorry. I never heard of projector {0}.".format(p))
 
