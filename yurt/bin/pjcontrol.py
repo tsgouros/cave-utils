@@ -129,16 +129,19 @@ class ProjectorControl(object):
         """
         if self.projector != "none":
             print("proj{0}".format(self.number), self.serialSwitch, self.switchPort, "cmd =", cmd)
-            # out = subprocess.check_output(["ssh",
-            #                                "cave001",
-            #                                "/gpfs/runtime/opt/cave-utils/yurt/bin/pjexpect", 
-            #                                "proj{0:02d}".format(self.number),
-            #                                "do",
-            #                                self.serialSwitch,
-            #                                self.switchPort,
-            #                                "\"{0}\"".format(cmd)])
+            FNULL = open(os.devnull, 'w')
+            out = subprocess.run(["ssh",
+                                  "cave001",
+                                  "/gpfs/runtime/opt/cave-utils/yurt/bin/pjexpect", 
+                                  "proj{0:02d}".format(self.number),
+                                  "do",
+                                  self.serialSwitch,
+                                  self.switchPort,
+                                  "\"{0}\"".format(cmd),
+                                 "2>/dev/null"],
+                                 stderr=FNULL)
         
-        # return out
+        return out
 
     def getInt(self, string):
         """
@@ -459,7 +462,7 @@ if __name__ == "__main__":
 
     LOGFORMAT = '%(asctime)-15s %(machine)s %(username)s %(message)s'
 #    logging.basicConfig(filename='/gpfs/runtime/opt/cave-utils/yurt/log/pjcontrollog.txt', level=logging.DEBUG,format=LOGFORMAT)
-    logging.basicConfig(filename='pjcontrollog.txt', level=logging.DEBUG,format=LOGFORMAT)
+    logging.basicConfig(filename='${PJCONTROLLOG}', level=logging.DEBUG,format=LOGFORMAT)
     logdata = {'username': os.getlogin(),
                'machine':  socket.gethostname()}
     logging.info('pjcontrol %s', " ".join(sys.argv[1:]), extra=logdata)
@@ -535,8 +538,11 @@ if __name__ == "__main__":
 
     #########################################################################
     # Open the shelf file.  It might be empty, so check first.
-    shelf = shelve.open(os.path.expandvars("../etc/projector3.db"), writeback=True)
+    shelf = shelve.open(os.path.expandvars("${PROJECTORDB}"), writeback=True)
 
+    # The next few lines were used in the transition from RH6 to RH7 and Python3,
+    # where the underlying db for shelve was replaced.  Left here as an aid to future
+    # efforts to upgrade the database.
     # import pickle
     # projsFile = open("projs.pkl", "rb")
     # projsPKL = pickle.load(projsFile)
