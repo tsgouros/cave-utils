@@ -129,19 +129,18 @@ class ProjectorControl(object):
         """
         if self.projector != "none":
             print("proj{0}".format(self.number), self.serialSwitch, self.switchPort, "cmd =", cmd)
-            FNULL = open(os.devnull, 'w')
-            out = subprocess.run(["ssh",
-                                  "cave001",
-                                  "/gpfs/runtime/opt/cave-utils/yurt/bin/pjexpect", 
-                                  "proj{0:02d}".format(self.number),
-                                  "do",
-                                  self.serialSwitch,
-                                  self.switchPort,
-                                  "\"{0}\"".format(cmd),
-                                 "2>/dev/null"],
-                                 stderr=FNULL)
-        
-        return out
+            cmdOut = subprocess.run(["ssh",
+                                     "cave001",
+                                     "/gpfs/runtime/opt/cave-utils/yurt/bin/pjexpect", 
+                                     "proj{0:02d}".format(self.number),
+                                     "do",
+                                     self.serialSwitch,
+                                     self.switchPort,
+                                     "\"{0}\"".format(cmd),
+                                     "2>/dev/null"],
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.DEVNULL)
+        return cmdOut.stdout.decode("utf-8")
 
     def getInt(self, string):
         """
