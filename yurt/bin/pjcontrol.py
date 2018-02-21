@@ -375,14 +375,12 @@ def fullReport(projectors, projectorControls):
     """
 
     print("\n\nPROJECTOR CONDITION REPORT")
-    projKeys = projectors.keys()
-    projKeys.sort()
+    projKeys = sorted(projectors.keys())
     for k in projKeys:
         projectors[k].pretty()
 
     print("\n\nPROJECTOR CONTROL REPORT")
-    projKeys = projectorControls.keys()
-    projKeys.sort()    
+    projKeys = sorted(projectorControls.keys())
     for k in projKeys:
         projectorControls[k].pretty()
 
