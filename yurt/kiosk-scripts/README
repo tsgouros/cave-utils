@@ -1,6 +1,8 @@
 
  The scripts in this directory are meant to be run on the kiosk
  machine, to manage the Scalable calibration data for the five
- projection screens that make up the YURT.
+ projection screens that make up the YURT.  They are to work with the
+ Cygwin environment on the kiosk machine, thus all the references to
+ /cygdrive/z and /cygdrive/z and so forth.
 
  
