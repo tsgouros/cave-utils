@@ -1,3 +1,6 @@
 #!/bin/bash
 
-seq 19 | parallel --sshlogin 1/cave001,1/cave002,1/cave003,1/cave004,1/cave005,1/cave006,1/cave007,1/cave008,1/cave009,1/cave010,1/cave011,1/cave012,1/cave013,1/cave014,1/cave015,1/cave016,1/cave017,1/cave018,1/cave019 sudo -n /gpfs/runtime/bin/yurt-kill.cmd
+cd /tmp
+
+seq -w 01 19 | parallel ssh -q -t cave0{} sudo -n /gpfs/runtime/bin/yurt-kill.cmd >/dev/null 2>&1 
+
