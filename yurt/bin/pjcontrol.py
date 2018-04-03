@@ -459,11 +459,13 @@ if __name__ == "__main__":
 
     LOGFORMAT = '%(asctime)-15s %(machine)s %(username)s %(message)s'
 #    logging.basicConfig(filename='/gpfs/runtime/opt/cave-utils/yurt/log/pjcontrollog.txt', level=logging.DEBUG,format=LOGFORMAT)
-    logging.basicConfig(filename='${PJCONTROLLOG}', level=logging.DEBUG,format=LOGFORMAT)
-    logdata = {'username': os.getlogin(),
-               'machine':  socket.gethostname()}
-    logging.info('pjcontrol %s', " ".join(sys.argv[1:]), extra=logdata)
 
+    logFile = os.path.expandvars('${PJCONTROLLOG}')
+    if logFile != "":
+        logging.basicConfig(filename=logFile, level=logging.DEBUG,format=LOGFORMAT)
+        logdata = {'username': os.getlogin(),
+                   'machine':  socket.gethostname()}
+        logging.info('pjcontrol %s', " ".join(sys.argv[1:]), extra=logdata)    
 
     ## TODO: This should not exit, but throw some kind of exception
     ## that if not handled, closes the shelf and exits.
